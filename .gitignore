@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Idea projects
+*.iml
+.idea/
+
+# Django stuff:
+*.log
+conf/
+media/
+db.sqlite3
