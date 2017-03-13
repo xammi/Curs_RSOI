@@ -1,5 +1,60 @@
 {% extends 'core/base.html' %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'libs/css/jquery.fullpage.css' %}">
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'libs/js/jquery.fullpage.min.js' %}"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('#fullpage').fullpage({
+                sectionsColor: ['#1bbc9b', '#4BBFC3', '#7BAABE', '#ccddff'],
+                anchors: ['main', 'adviser', 'site-owner', 'use-it'],
+                menu: '#left-navbar',
+                scrollBar: true
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block left_nav %}
+    <li data-menuanchor="main">
+        <a href="#main">Главная</a>
+    </li>
+    <li data-menuanchor="adviser">
+        <a href="#adviser">Рекламодателю</a>
+    </li>
+    <li data-menuanchor="site-owner">
+        <a href="#site-owner">Владельцу сайта</a>
+    </li>
+    <li data-menuanchor="use-it">
+        <a href="#use-it">Начать работу</a>
+    </li>
+{% endblock %}
 
 {% block content %}
-    <h3>Index html</h3>
+    <div id="fullpage">
+        <div class="section active">
+            <div style="text-align: center">
+                <h1>Главная: Targeto</h1>
+            </div>
+        </div>
+        <div class="section">
+            <div style="text-align: center">
+                <h1>Страничка для рекламодателя</h1>
+            </div>
+        </div>
+        <div class="section">
+            <div style="text-align: center">
+                <h1>Страничка для владельца сайта</h1>
+            </div>
+        </div>
+        <div class="section">
+            <div style="text-align: center">
+                <h1>Начать работу с системой?</h1>
+            </div>
+        </div>
+    </div>
 {% endblock %}
