@@ -1,8 +1,9 @@
+from django.contrib.auth.base_user import BaseUserManager
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 
 
-class UserManager(models.Manager):
+class UserManager(BaseUserManager):
     use_in_migrations = True
 
     def _create_user(self, email, password, **extra_fields):
@@ -35,7 +36,9 @@ class User(PermissionsMixin, AbstractBaseUser):
     email = models.EmailField(verbose_name='Email', unique=True)
     first_name = models.CharField(verbose_name='Имя', max_length=128, null=True, blank=True)
     last_name = models.CharField(verbose_name='Фамилия', max_length=128, null=True, blank=True)
+
     is_active = models.BooleanField(verbose_name='Активен?', default=False)
+    is_staff = models.BooleanField(verbose_name='Персонал?', default=False)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
