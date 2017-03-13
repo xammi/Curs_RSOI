@@ -4,8 +4,10 @@
 {% block left_nav %}
     {% if user.role == ADVISER %}
         <li><a href="#">Новая компания</a></li>
+        <li><a href="#">Отчёты</a></li>
     {% elif user.role == SITE_OWNER %}
         <li><a href="#">Новая площадка</a></li>
+        <li><a href="#">Отчёты</a></li>
     {% endif %}
 {% endblock %}
 
@@ -16,7 +18,10 @@
         <p>Роль: {{ user.get_human_role }}</p>
         <br>
         {% if user.role == ADVISER %}
-            <h4>1. Мои рекламные кампании</h4>
+            <h4>1. Платёжные данные</h4>
+            <p>Здесь пока ничего нет</p>
+            <br>
+            <h4>2. Мои рекламные кампании</h4>
             {% if not companies %}
                 <p>Здесь пока ничего нет</p>
             {% else %}

@@ -31,22 +31,21 @@
                 </ul>
                 <ul class="nav navbar-nav navbar-right" id="right-navbar">
                     {% block right_nav %}
-                        <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                                {% if not user.is_authenticated %}Войти{% else %}{{ user.email }}{% endif %}
-                                <span class="caret"></span>
-                            </a>
-                            <ul class="dropdown-menu">
-                                {% block right_drop %}
-                                    {% if user.is_authenticated %}
-                                        <li><a href="{% url 'core:profile' %}">Личный кабинет</a></li>
-                                        <li><a href="{% url 'core:logout' %}">Выйти</a></li>
-                                    {% else %}
+                        {% if user.is_authenticated %}
+                            <li><a href="{% url 'core:profile' %}">{{ user.email }}</a></li>
+                            <li><a href="{% url 'core:logout' %}">Выйти</a></li>
+                        {% else %}
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                                    Войти&nbsp;<span class="caret"></span>
+                                </a>
+                                <ul class="dropdown-menu">
+                                    {% block right_drop %}
                                         <li>{% include 'core/blocks/login_form.html' %}</li>
-                                    {% endif %}
-                                {% endblock %}
-                            </ul>
-                        </li>
+                                    {% endblock %}
+                                </ul>
+                            </li>
+                        {% endif %}
                     {% endblock %}
                 </ul>
             </div>
