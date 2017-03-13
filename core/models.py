@@ -10,6 +10,9 @@ class UserManager(BaseUserManager):
         if not email:
             raise ValueError('The given email must be set')
 
+        if 'username' in extra_fields:
+            del extra_fields['username']
+
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
@@ -17,17 +20,24 @@ class UserManager(BaseUserManager):
         return user
 
     def create_user(self, email=None, password=None, **extra_fields):
-        extra_fields.setdefault('is_staff', False)
-        extra_fields.setdefault('is_superuser', False)
         return self._create_user(email, password, **extra_fields)
 
     def create_superuser(self, email, password, **extra_fields):
+        extra_fields['is_active'] = True
         extra_fields['is_staff'] = True
         extra_fields['is_superuser'] = True
         return self._create_user(email, password, **extra_fields)
 
 
 class User(PermissionsMixin, AbstractBaseUser):
+    ADVISER = 0
+    SITE_OWNER = 1
+
+    ROLES = (
+        (ADVISER, 'Рекламодатель'),
+        (SITE_OWNER, 'Владелец сайта')
+    )
+
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'пользователи'
@@ -36,6 +46,7 @@ class User(PermissionsMixin, AbstractBaseUser):
     email = models.EmailField(verbose_name='Email', unique=True)
     first_name = models.CharField(verbose_name='Имя', max_length=128, null=True, blank=True)
     last_name = models.CharField(verbose_name='Фамилия', max_length=128, null=True, blank=True)
+    role = models.PositiveIntegerField(verbose_name='Роль', choices=ROLES, null=True, blank=True)
 
     is_active = models.BooleanField(verbose_name='Активен?', default=False)
     is_staff = models.BooleanField(verbose_name='Персонал?', default=False)

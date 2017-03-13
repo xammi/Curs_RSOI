@@ -3,20 +3,12 @@
 
 {% block css %}
     <link rel="stylesheet" href="{% static 'libs/css/jquery.fullpage.css' %}">
+    <link rel="stylesheet" href="{% static 'libs/css/magnific-popup.css' %}">
 {% endblock %}
 
 {% block js %}
     <script src="{% static 'libs/js/jquery.fullpage.min.js' %}"></script>
-    <script type="text/javascript">
-        $(document).ready(function() {
-            $('#fullpage').fullpage({
-                sectionsColor: ['#1bbc9b', '#4BBFC3', '#7BAABE', '#ccddff'],
-                anchors: ['main', 'adviser', 'site-owner', 'use-it'],
-                menu: '#left-navbar',
-                scrollBar: true
-            });
-        });
-    </script>
+    <script src="{% static 'libs/js/magnific-popup.min.js' %}"></script>
 {% endblock %}
 
 {% block left_nav %}
@@ -34,59 +26,36 @@
     </li>
 {% endblock %}
 
-{% block right_nav %}
-    <li class="dropdown">
-        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-            {% if not user.is_authenticated %}Войти{% else %}{{ user.email }}{% endif %}
-            <span class="caret"></span>
-        </a>
-        <ul class="dropdown-menu">
-            {% if user.is_authenticated %}
-                <li><a href="#">Личный кабинет</a></li>
-                <li><a href="#">Редактирование</a></li>
-                <li><a href="#">Выйти</a></li>
-            {% else %}
-                <li>
-                    <form action="#" method="post" class="form-horizontal" style="margin:30px;min-width:260px">
-                        <h3>Log in</h3>
-                        <div class="form-group">
-                            <label for="id_email" class="col-sm-2 control-label">Email</label>
-                            <div class="col-sm-9 col-sm-offset-1">
-                                <input type="email" name="email" id="id_email" class="form-control">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="id_password" class="col-sm-2 control-label">Пароль</label>
-                            <div class="col-sm-9 col-sm-offset-1">
-                                <input type="password" name="password" id="id_password" class="form-control">
-                            </div>
-                        </div>
-                        <div class="row">
-                            <button type="submit" class="btn btn-primary col-sm-3 col-sm-offset-1">Войти</button>
-                            <button type="submit" class="btn btn-default col-sm-5 col-sm-offset-2">Регистрация</button>
-                        </div>
-                    </form>
-                </li>
-            {% endif %}
-        </ul>
-    </li>
+{% block right_drop %}
+    {% if user.is_authenticated %}
+        <li><a href="{% url 'core:profile' %}">Личный кабинет</a></li>
+{#          <li><a href="#">Редактирование</a></li>#}
+        <li><a href="{% url 'core:logout' %}">Выйти</a></li>
+    {% else %}
+        <li>{% include 'core/blocks/login_form.html' %}</li>
+    {% endif %}
 {% endblock %}
 
 {% block content %}
+    {% include 'core/blocks/preloader.html' %}
     <div id="fullpage">
         <div class="section active">
             <div style="text-align: center">
-                <h1>Главная: Targeto</h1>
+                <h1>Главная: Targeto</h1><br>
+                <button class="btn btn-info btn-lg" id="js-more">Подробнее</button>
+                <script>$('#js-more').click(function () { $.fn.fullpage.moveSectionDown(); });</script>
             </div>
         </div>
         <div class="section">
             <div style="text-align: center">
-                <h1>Страничка для рекламодателя</h1>
+                <h1>Страничка для рекламодателя</h1><br>
+                <button class="btn btn-primary btn-lg" id="js-adviser-reg">Регистрация</button>
             </div>
         </div>
         <div class="section">
             <div style="text-align: center">
-                <h1>Страничка для владельца сайта</h1>
+                <h1>Страничка для владельца сайта</h1><br>
+                <button class="btn btn-default btn-lg" id="js-site-owner-reg">Регистрация</button>
             </div>
         </div>
         <div class="section">
@@ -94,5 +63,31 @@
                 <h1>Начать работу с системой?</h1>
             </div>
         </div>
+    </div>
+{% endblock %}
+
+{% block body_js %}
+    <script type="text/javascript">
+        $('#fullpage').fullpage({
+            sectionsColor: ['#1bbc9b', '#4BBFC3', '#7BAABE', '#ccddff'],
+            anchors: ['main', 'adviser', 'site-owner', 'use-it'],
+            menu: '#left-navbar',
+            scrollBar: true
+        });
+        $('#js-adviser-reg').magnificPopup({
+            items: { src: '#adviser-modal', type: 'inline' }
+        });
+        $('#js-site-owner-reg').magnificPopup({
+            items: { src: '#site-owner-modal', type: 'inline' }
+        });
+    </script>
+{% endblock %}
+
+{% block modals %}
+    <div id="adviser-modal" class="mfp-hide white-modal">
+        {% include 'core/blocks/register_form.html' with role=ADVISER %}
+    </div>
+    <div id="site-owner-modal" class="mfp-hide white-modal">
+        {% include 'core/blocks/register_form.html' with role=SITE_OWNER %}
     </div>
 {% endblock %}

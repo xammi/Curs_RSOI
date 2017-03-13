@@ -55,6 +55,10 @@ ROOT_URLCONF = 'curs_rsoi.urls'
 
 AUTH_USER_MODEL = 'core.User'
 
+LOGIN_URL = '/index/'
+
+LOGIN_ERROR_URL = '/index/'
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
