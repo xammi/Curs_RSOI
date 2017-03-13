@@ -6,7 +6,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse, HttpResponseRedirect
 from django.views.generic import TemplateView, DetailView, FormView, RedirectView
 
-from core.models import User
+from core.models import User, ACompany, ASite
 
 
 class AjaxFormView(FormView):
@@ -93,6 +93,12 @@ class ProfileView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        if self.object.role == User.ADVISER:
+            context['companies'] = ACompany.objects.all()
+        elif self.object.role == User.SITE_OWNER:
+            context['sites'] = ASite.objects.all()
+
         context['ADVISER'] = User.ADVISER
         context['SITE_OWNER'] = User.SITE_OWNER
         return context
