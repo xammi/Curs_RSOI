@@ -26,16 +26,6 @@
     </li>
 {% endblock %}
 
-{% block right_drop %}
-    {% if user.is_authenticated %}
-        <li><a href="{% url 'core:profile' %}">Личный кабинет</a></li>
-{#          <li><a href="#">Редактирование</a></li>#}
-        <li><a href="{% url 'core:logout' %}">Выйти</a></li>
-    {% else %}
-        <li>{% include 'core/blocks/login_form.html' %}</li>
-    {% endif %}
-{% endblock %}
-
 {% block content %}
     {% include 'core/blocks/preloader.html' %}
     <div id="fullpage">

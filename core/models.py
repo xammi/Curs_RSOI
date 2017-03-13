@@ -1,6 +1,6 @@
-from django.contrib.auth.base_user import BaseUserManager
+from django.contrib.auth.base_user import BaseUserManager, AbstractBaseUser
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
+from django.contrib.auth.models import PermissionsMixin, AbstractUser
 
 
 class UserManager(BaseUserManager):
@@ -29,7 +29,7 @@ class UserManager(BaseUserManager):
         return self._create_user(email, password, **extra_fields)
 
 
-class User(PermissionsMixin, AbstractBaseUser):
+class User(AbstractBaseUser, PermissionsMixin):
     ADVISER = 0
     SITE_OWNER = 1
 
@@ -60,4 +60,17 @@ class User(PermissionsMixin, AbstractBaseUser):
         return self.email
 
     def get_full_name(self):
-        return '{} {}'.format(self.first_name, self.last_name)
+        parts = []
+        if self.first_name:
+            parts.append(self.first_name.capitalize())
+        if self.last_name:
+            parts.append(self.last_name.capitalize())
+        return ' '.join(parts)
+
+    def get_human_role(self):
+        if self.role is not None:
+            return dict(self.ROLES).get(self.role)
+        return 'Роль неизвестна'
+
+    def get_short_name(self):
+        return self.email

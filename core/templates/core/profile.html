@@ -1,6 +1,32 @@
 {% extends 'core/base.html' %}
 {% load static %}
 
+{% block left_nav %}
+    {% if user.role == ADVISER %}
+        <li><a href="#">Новая компания</a></li>
+    {% elif user.role == SITE_OWNER %}
+        <li><a href="#">Новая площадка</a></li>
+    {% endif %}
+{% endblock %}
+
 {% block content %}
-    <h1>Личный кабинет</h1>
+    <div class="content-inner" style="margin: 0 5%">
+        <h3>ЛК - {{ user.get_full_name }}</h3>
+        <p>Email: {{ user.email }}</p>
+        <p>Роль: {{ user.get_human_role }}</p>
+        <br>
+        {% if user.role == ADVISER %}
+            <h4>1. Мои рекламные кампании</h4>
+            {% if not companies %}
+                <p>Здесь пока ничего нет</p>
+            {% else %}
+            {% endif %}
+        {% elif user.role == SITE_OWNER %}
+            <h4>1. Мои рекламные площадки</h4>
+            {% if not sites %}
+                <p>Здесь пока ничего нет</p>
+            {% else %}
+            {% endif %}
+        {% endif %}
+    </div>
 {% endblock %}

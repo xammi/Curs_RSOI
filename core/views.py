@@ -91,6 +91,12 @@ class ProfileView(LoginRequiredMixin, DetailView):
     def get_object(self, queryset=None):
         return self.request.user
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['ADVISER'] = User.ADVISER
+        context['SITE_OWNER'] = User.SITE_OWNER
+        return context
+
 
 class RegisterView(AjaxFormView):
     class RegisterForm(forms.ModelForm):
@@ -99,7 +105,7 @@ class RegisterView(AjaxFormView):
 
         class Meta:
             model = User
-            fields = ('email', 'first_name', 'last_name')
+            fields = ('email', 'first_name', 'last_name', 'role')
 
         def clean(self):
             cleaned_data = super().clean()
@@ -128,6 +134,7 @@ class RegisterView(AjaxFormView):
         instance = form.save(commit=False)
         instance.is_active = True
         instance.save()
+        login(self.request, instance)
         return super().form_valid(form)
 
     def get_success_url(self):
