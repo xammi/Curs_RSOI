@@ -31,26 +31,52 @@
     <div id="fullpage">
         <div class="section active">
             <div style="text-align: center">
-                <h1>Главная: Targeto</h1><br>
+                <h1>)) Targeto ((</h1>
+                <h3>Мы автоматически размещаем Вашу рекламу<br>на предоставленных для этого площадках</h3>
+                <h3>Система переводит деньги<br>от рекламодателей к владельцам площадок<br>только за реальные показы</h3>
+                <br>
                 <button class="btn btn-info btn-lg" id="js-more">Подробнее</button>
                 <script>$('#js-more').click(function () { $.fn.fullpage.moveSectionDown(); });</script>
             </div>
         </div>
         <div class="section">
             <div style="text-align: center">
-                <h1>Страничка для рекламодателя</h1><br>
-                <button class="btn btn-primary btn-lg" id="js-adviser-reg">Регистрация</button>
+                <h1>Что получает рекламодатель?</h1><br>
+                <div style="display:inline-block">
+                    <img src="{% static 'core/img/for_adviser.png' %}" width="720" height="400"/>
+                </div>
+                <br><br>
+                <button class="btn btn-primary btn-lg js-adviser-reg">Зарегистрироваться!</button>
             </div>
         </div>
         <div class="section">
             <div style="text-align: center">
-                <h1>Страничка для владельца сайта</h1><br>
-                <button class="btn btn-default btn-lg" id="js-site-owner-reg">Регистрация</button>
+                <h1>Что получает владелец сайта?</h1><br>
+                <div style="display:inline-block">
+                    <img src="{% static 'core/img/for_owner.png' %}" width="720" height="400"/>
+                </div>
+                <br><br>
+                <button class="btn btn-default btn-lg js-site-owner-reg">Зарегистрироваться!</button>
             </div>
         </div>
         <div class="section">
             <div style="text-align: center">
-                <h1>Начать работу с системой?</h1>
+                <h1>Начать работу с системой?</h1><br>
+                <div class="row">
+                    <div class="col-sm-5" style="text-align: center">
+                        <img src="{% static 'core/img/human.png' %}" width="150" height="170">
+                        <h3>Вы рекламодатель?</h3><br>
+                        <button class="btn btn-primary btn-lg js-adviser-reg">Начать!</button>
+                    </div>
+                    <div class="col-sm-2">
+                        <img src="{% static 'core/img/targeto.png' %}" width="220" height="200">
+                    </div>
+                    <div class="col-sm-5" style="text-align: center">
+                        <img src="{% static 'core/img/human.png' %}" width="150" height="170">
+                        <h3>Вы владелец сайта?</h3><br>
+                        <button class="btn btn-default btn-lg js-site-owner-reg">Начать!</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -64,10 +90,10 @@
             menu: '#left-navbar',
             scrollBar: true
         });
-        $('#js-adviser-reg').magnificPopup({
+        $('.js-adviser-reg').magnificPopup({
             items: { src: '#adviser-modal', type: 'inline' }
         });
-        $('#js-site-owner-reg').magnificPopup({
+        $('.js-site-owner-reg').magnificPopup({
             items: { src: '#site-owner-modal', type: 'inline' }
         });
     </script>
