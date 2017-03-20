@@ -33,6 +33,16 @@
                 {% if not my_companies %}
                     <p class="no-companies">Здесь пока ничего нет. <a href="#" class="js-add-form">Добавить?</a></p>
                 {% else %}
+                    {% for company in my_companies %}
+                        <div class="well well-success">
+                            <div class="row">
+                                <h4 class="col-sm-5"><a href="{% url 'core:company_details' company.id %}">{{ company.title }}</a></h4>
+                                <div class="col-sm-2" style="line-height: 3em"><p></p></div>
+                                <div class="col-sm-2" style="line-height: 3em"><a href="{{ company.link }}">Переход по ссылке</a></div>
+                                <div class="col-sm-3" style="line-height: 3em"><div style="color: green">Принято</div></div>
+                            </div>
+                        </div>
+                    {% endfor %}
                 {% endif %}
             </div>
         {% elif user.role == SITE_OWNER %}
@@ -47,9 +57,7 @@
                                 <h4 class="col-sm-5"><a href="{% url 'core:site_details' site.id %}">{{ site.title }}</a></h4>
                                 <div class="col-sm-2" style="line-height: 3em"><p>{{ site.get_human_topic }}</p></div>
                                 <div class="col-sm-2" style="line-height: 3em"><a href="{{ site.link }}">Переход на сайт</a></div>
-                                <div class="col-sm-3" style="line-height: 3em">
-                                    <div style="color: red">Ожидает внедрения</div>
-                                </div>
+                                <div class="col-sm-3" style="line-height: 3em"><div style="color: red">Ожидает внедрения</div></div>
                             </div>
                         </div>
                     {% endfor %}
@@ -76,9 +84,17 @@
                 <h4 class="col-sm-5"><a href="<%= details_url %>"><%= title %></a></h4>
                 <div class="col-sm-2" style="line-height: 3em"><p><%= topic %></p></div>
                 <div class="col-sm-2" style="line-height: 3em"><a href="<%= link %>">Переход на сайт</a></div>
-                <div class="col-sm-3" style="line-height: 3em">
-                    <div style="color: red">Ожидает внедрения</div>
-                </div>
+                <div class="col-sm-3" style="line-height: 3em"><div style="color: red">Ожидает внедрения</div></div>
+            </div>
+        </div>
+    </script>
+    <script type="text/template" id="company-item-tml">
+        <div class="well well-success">
+            <div class="row">
+                <h4 class="col-sm-5"><a href="<%= details_url %>"><%= title %></a></h4>
+                <div class="col-sm-2" style="line-height: 3em"><p></p></div>
+                <div class="col-sm-2" style="line-height: 3em"><a href="<%= link %>">Переход по ссылке</a></div>
+                <div class="col-sm-3" style="line-height: 3em"><div style="color: green">Принято</div></div>
             </div>
         </div>
     </script>

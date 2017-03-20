@@ -1,1 +1,33 @@
-<h3>Новая компания</h3>
+<form action="{% url 'core:add_company' %}" method="post" class="form-horizontal" id="js-form-company">
+    <h3>Новая компания</h3>
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="id_title" class="col-sm-2 control-label">Название</label>
+        <div class="col-sm-9 col-sm-offset-1">
+            <input type="text" class="form-control" name="title" id="id_title">
+            <div class="error error-title"></div>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="id_text" class="col-sm-2 control-label">Описание</label>
+        <div class="col-sm-9 col-sm-offset-1">
+            <textarea class="form-control" name="text" id="id_text" rows="7"></textarea>
+            <div class="error error-text"></div>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="id_link" class="control-label col-sm-4">Переход на</label>
+        <div class="col-sm-8">
+            <input type="text" id="id_link" class="form-control" name="link">
+            <div class="error error-link"></div>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="id_max_score" class="control-label col-sm-7">Макс. траты (руб. / нед.)</label>
+        <div class="col-sm-5">
+            <input type="number" id="id_max_score" class="form-control" name="max_score" value="100">
+            <div class="error error-max_score"></div>
+        </div>
+    </div>
+    <button class="btn btn-primary">Картинки</button>
+</form>

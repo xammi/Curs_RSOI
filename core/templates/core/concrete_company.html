@@ -1,0 +1,9 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="content-inner" style="margin: 0 5%">
+        <h3>Детали по компании: {{ company.title }}</h3><br>
+        <a href="{% url 'core:profile' %}">Назад к профилю</a>
+    </div>
+{% endblock %}

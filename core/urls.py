@@ -1,6 +1,7 @@
 from django.conf.urls import url
 
-from core.views import IndexView, ProfileView, LoginView, LogoutView, RegisterView, AddSiteView, SiteDetailsView
+from core.views import IndexView, ProfileView, LoginView, LogoutView, RegisterView, AddSiteView, SiteDetailView, \
+    AddCompanyView, CompanyDetailView
 
 urlpatterns = [
     url('^$', IndexView.as_view(), name='home'),
@@ -12,5 +13,7 @@ urlpatterns = [
     url('^register/$', RegisterView.as_view(), name='register'),
 
     url('^site/add/$', AddSiteView.as_view(), name='add_site'),
-    url('^site/details/(?P<site_id>\d+)/$', SiteDetailsView.as_view(), name='site_details'),
+    url('^site/details/(?P<site_id>\d+)/$', SiteDetailView.as_view(), name='site_details'),
+    url('^company/add/$', AddCompanyView.as_view(), name='add_company'),
+    url('^company/details/(?P<company_id>\d+)/$', CompanyDetailView.as_view(), name='company_details'),
 ]

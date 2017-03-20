@@ -1,5 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError
+from django.http import HttpResponseForbidden
 from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -181,9 +182,62 @@ class AddSiteView(AjaxFormView):
         })
 
 
-class SiteDetailsView(DetailView):
+class SiteDetailView(LoginRequiredMixin, DetailView):
     http_method_names = ['get']
     model = ASite
     pk_url_kwarg = 'site_id'
     context_object_name = 'site'
     template_name = 'core/concrete_site.html'
+
+    def get(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if request.user != instance.owner:
+            return HttpResponseForbidden()
+        return super().get(request, *args, **kwargs)
+
+
+class AddCompanyView(AjaxFormView):
+    class AddCompanyForm(forms.ModelForm):
+        class Meta:
+            model = ACompany
+            fields = ('title', 'text', 'link', 'max_score')
+
+        def __init__(self, user, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.user = user
+
+        def save(self, commit=True):
+            instance = super().save(commit=False)
+            instance.owner = self.user
+            if commit:
+                instance.save()
+            return instance
+
+    http_method_names = ['post']
+    form_class = AddCompanyForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def form_valid(self, form):
+        instance = form.save()
+        return JsonResponse({
+            'status': self.ok_status,
+            'data': instance.as_json()
+        })
+
+
+class CompanyDetailView(LoginRequiredMixin, DetailView):
+    http_method_names = ['get']
+    model = ACompany
+    pk_url_kwarg = 'company_id'
+    context_object_name = 'company'
+    template_name = 'core/concrete_company.html'
+
+    def get(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if request.user != instance.owner:
+            return HttpResponseForbidden()
+        return super().get(request, *args, **kwargs)

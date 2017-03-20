@@ -101,6 +101,17 @@ class ACompany(DefaultModel):
     def __str__(self):
         return self.title
 
+    def as_json(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'text': self.text,
+            'link': self.link,
+            'max_score': self.max_score,
+            'owner_id': self.owner.id,
+            'details_url': reverse('core:company_details', args=[self.id]),
+        }
+
 
 class ImageAttachment(DefaultModel):
     class Meta:
