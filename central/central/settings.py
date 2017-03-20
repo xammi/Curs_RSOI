@@ -51,7 +51,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'curs_rsoi.urls'
+ROOT_URLCONF = 'central.urls'
 
 AUTH_USER_MODEL = 'core.User'
 
@@ -75,7 +75,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'curs_rsoi.wsgi.application'
+WSGI_APPLICATION = 'central.wsgi.application'
 
 
 # Database

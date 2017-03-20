@@ -14,4 +14,4 @@ __pycache__/
 *.log
 conf/
 media/
-db.sqlite3
+*/db.sqlite3

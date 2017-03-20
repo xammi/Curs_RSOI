@@ -1,10 +1,10 @@
 from django import forms
-from django.core.exceptions import ValidationError
-from django.http import HttpResponseForbidden
-from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import ValidationError
+from django.http import HttpResponseForbidden
 from django.http import JsonResponse, HttpResponseRedirect
+from django.urls import reverse
 from django.views.generic import TemplateView, DetailView, FormView, RedirectView
 
 from core.models import User, ACompany, ASite
