@@ -1,1 +1,30 @@
-<h3>Новая площадка</h3>
+<form action="{% url 'core:add_site' %}" method="post" id="js-form-site" class="form-horizontal">
+    <h3>Новая площадка</h3>
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="id_title" class="control-label col-sm-2">Название</label>
+        <div class="col-sm-9 col-sm-offset-1">
+            <input type="text" id="id_title" class="form-control" name="title">
+            <div class="error error-title"></div>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="id_link" class="control-label col-sm-2">Домен</label>
+        <div class="col-sm-9 col-sm-offset-1">
+            <input type="text" id="id_link" class="form-control" name="link">
+            <div class="error error-link"></div>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="id_topic" class="control-label col-sm-2">Тема</label>
+        <div class="col-sm-7 col-sm-offset-1">
+            <select name="topic" id="id_topic" class="form-control">
+                {% for topic_id, topic_name in SITE_TOPICS %}
+                    <option value="{{ topic_id }}">{{ topic_name }}</option>
+                {% endfor %}
+            </select>
+            <div class="error error-topic"></div>
+        </div>
+    </div>
+    <button class="btn btn-primary">Отправить</button>
+</form>

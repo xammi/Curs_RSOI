@@ -95,10 +95,11 @@ class ProfileView(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
 
         if self.object.role == User.ADVISER:
-            context['companies'] = ACompany.objects.all()
+            context['my_companies'] = ACompany.objects.all()
         elif self.object.role == User.SITE_OWNER:
-            context['sites'] = ASite.objects.all()
+            context['my_sites'] = ASite.objects.all()
 
+        context['SITE_TOPICS'] = ASite.TOPICS
         context['ADVISER'] = User.ADVISER
         context['SITE_OWNER'] = User.SITE_OWNER
         return context
@@ -145,3 +146,44 @@ class RegisterView(AjaxFormView):
 
     def get_success_url(self):
         return reverse('core:profile')
+
+
+class AddSiteView(AjaxFormView):
+    class AddSiteForm(forms.ModelForm):
+        class Meta:
+            model = ASite
+            fields = ('title', 'link', 'topic')
+
+        def __init__(self, user, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.user = user
+
+        def save(self, commit=True):
+            instance = super().save(commit=False)
+            instance.owner = self.user
+            if commit:
+                instance.save()
+            return instance
+
+    http_method_names = ['post']
+    form_class = AddSiteForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def form_valid(self, form):
+        instance = form.save()
+        return JsonResponse({
+            'status': self.ok_status,
+            'data': instance.as_json()
+        })
+
+
+class SiteDetailsView(DetailView):
+    http_method_names = ['get']
+    model = ASite
+    pk_url_kwarg = 'site_id'
+    context_object_name = 'site'
+    template_name = 'core/concrete_site.html'

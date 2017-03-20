@@ -9,6 +9,7 @@
 {% block js %}
     <script src="{% static 'libs/js/jquery.fullpage.min.js' %}"></script>
     <script src="{% static 'libs/js/magnific-popup.min.js' %}"></script>
+    <script src="{% static 'core/js/index.js' %}"></script>
 {% endblock %}
 
 {% block left_nav %}
@@ -36,7 +37,6 @@
                 <h3>Система переводит деньги<br>от рекламодателей к владельцам площадок<br>только за реальные показы</h3>
                 <br>
                 <button class="btn btn-info btn-lg" id="js-more">Подробнее</button>
-                <script>$('#js-more').click(function () { $.fn.fullpage.moveSectionDown(); });</script>
             </div>
         </div>
         <div class="section">
@@ -61,7 +61,7 @@
         </div>
         <div class="section">
             <div style="text-align: center">
-                <h1>Начать работу с системой?</h1><br>
+                <h1>Начать работу с системой?</h1><br><br>
                 <div class="row">
                     <div class="col-sm-5" style="text-align: center">
                         <img src="{% static 'core/img/human.png' %}" width="150" height="170">
@@ -80,23 +80,6 @@
             </div>
         </div>
     </div>
-{% endblock %}
-
-{% block body_js %}
-    <script type="text/javascript">
-        $('#fullpage').fullpage({
-            sectionsColor: ['#1bbc9b', '#4BBFC3', '#7BAABE', '#ccddff'],
-            anchors: ['main', 'adviser', 'site-owner', 'use-it'],
-            menu: '#left-navbar',
-            scrollBar: true
-        });
-        $('.js-adviser-reg').magnificPopup({
-            items: { src: '#adviser-modal', type: 'inline' }
-        });
-        $('.js-site-owner-reg').magnificPopup({
-            items: { src: '#site-owner-modal', type: 'inline' }
-        });
-    </script>
 {% endblock %}
 
 {% block modals %}

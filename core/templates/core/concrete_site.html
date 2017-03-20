@@ -1,0 +1,15 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="content-inner" style="margin: 0 5%">
+        <h3>Детали по сайту: {{ site.title }}</h3><br>
+        <div class="panel panel-default">
+            <div class="panel-heading">Ваш код для внедрения на сайте</div>
+            <div class="panel-body">
+                <textarea name="code" id="id_code" cols="50" rows="10"><script>{% include 'core/blocks/adv_code.js' %}</script></textarea>
+            </div>
+        </div>
+        <a href="{% url 'core:profile' %}">Назад к профилю</a>
+    </div>
+{% endblock %}

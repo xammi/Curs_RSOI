@@ -7,15 +7,14 @@
 
 {% block js %}
     <script src="{% static 'libs/js/magnific-popup.min.js' %}"></script>
+    <script src="{% static 'core/js/profile.js' %}"></script>
 {% endblock %}
 
 {% block left_nav %}
     {% if user.role == ADVISER %}
         <li><a href="#" class="js-add-form">Новая компания</a></li>
-        <li><a href="#">Отчёты</a></li>
     {% elif user.role == SITE_OWNER %}
         <li><a href="#" class="js-add-form">Новая площадка</a></li>
-        <li><a href="#">Отчёты</a></li>
     {% endif %}
 {% endblock %}
 
@@ -31,17 +30,29 @@
             <br>
             <h4>2. Мои рекламные кампании</h4>
             <div class="js-companies">
-                {% if not companies %}
-                    <p>Здесь пока ничего нет. <a href="#" class="js-add-form">Добавить?</a></p>
+                {% if not my_companies %}
+                    <p class="no-companies">Здесь пока ничего нет. <a href="#" class="js-add-form">Добавить?</a></p>
                 {% else %}
                 {% endif %}
             </div>
         {% elif user.role == SITE_OWNER %}
             <h4>1. Мои рекламные площадки</h4>
             <div class="js-sites">
-                {% if not sites %}
-                    <p>Здесь пока ничего нет. <a href="#" class="js-add-form">Добавить?</a></p>
+                {% if not my_sites %}
+                    <p class="no-sites">Здесь пока ничего нет. <a href="#" class="js-add-form">Добавить?</a></p>
                 {% else %}
+                    {% for site in my_sites %}
+                        <div class="well well-success">
+                            <div class="row">
+                                <h4 class="col-sm-5"><a href="{% url 'core:site_details' site.id %}">{{ site.title }}</a></h4>
+                                <div class="col-sm-2" style="line-height: 3em"><p>{{ site.get_human_topic }}</p></div>
+                                <div class="col-sm-2" style="line-height: 3em"><a href="{{ site.link }}">Переход на сайт</a></div>
+                                <div class="col-sm-3" style="line-height: 3em">
+                                    <div style="color: red">Ожидает внедрения</div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
                 {% endif %}
             </div>
         {% endif %}
@@ -49,9 +60,6 @@
 {% endblock %}
 
 {% block modals %}
-    <script>
-        $('.js-add-form').magnificPopup({ items: { src: '#add-modal', type: 'inline' } });
-    </script>
     <div id="add-modal" class="mfp-hide white-modal">
         {% if user.role == ADVISER %}
             {% include 'core/blocks/company_form.html' %}
@@ -59,4 +67,19 @@
             {% include 'core/blocks/site_form.html' %}
         {% endif %}
     </div>
+{% endblock %}
+
+{% block client %}
+    <script type="text/template" id="site-item-tml">
+        <div class="well well-success">
+            <div class="row">
+                <h4 class="col-sm-5"><a href="<%= details_url %>"><%= title %></a></h4>
+                <div class="col-sm-2" style="line-height: 3em"><p><%= topic %></p></div>
+                <div class="col-sm-2" style="line-height: 3em"><a href="<%= link %>">Переход на сайт</a></div>
+                <div class="col-sm-3" style="line-height: 3em">
+                    <div style="color: red">Ожидает внедрения</div>
+                </div>
+            </div>
+        </div>
+    </script>
 {% endblock %}

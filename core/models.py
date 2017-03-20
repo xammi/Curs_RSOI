@@ -1,6 +1,7 @@
 from django.contrib.auth.base_user import BaseUserManager, AbstractBaseUser
 from django.db import models
 from django.contrib.auth.models import PermissionsMixin, AbstractUser
+from django.urls import reverse
 
 
 class DefaultModel(models.Model):
@@ -140,7 +141,7 @@ class ASite(DefaultModel):
         ordering = ['-created']
 
     title = models.CharField(verbose_name='Название сайта', max_length=100)
-    topic = models.CharField(verbose_name='Тип площадки', max_length=100)
+    topic = models.PositiveIntegerField(verbose_name='Тип площадки', choices=TOPICS)
     link = models.URLField(max_length=256, verbose_name='Домен сайта')
     owner = models.ForeignKey('User', verbose_name='Владелец')
 
@@ -148,6 +149,16 @@ class ASite(DefaultModel):
         return self.title
 
     def get_human_topic(self):
-        if self.topic is not None:
+        if self.topic is not None and self.topic in self.TOPICS:
             return dict(self.TOPICS).get(self.topic)
         return 'Тип неизвестен'
+
+    def as_json(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'topic': self.get_human_topic(),
+            'link': self.link,
+            'owner_id': self.owner.id,
+            'details_url': reverse('core:site_details', args=[self.id]),
+        }

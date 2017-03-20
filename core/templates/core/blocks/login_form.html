@@ -19,17 +19,3 @@
 {#      <button type="submit" class="btn btn-default col-sm-5 col-sm-offset-2">Регистрация</button>#}
     </div>
 </form>
-<script>
-    $('#js-login-form').submit(function (event) {
-        event.preventDefault();
-        $.post($(this).attr('action'), $(this).serialize())
-            .done(function (response) {
-                console.log(response);
-                if (response.status === 'OK') {
-                    location.replace(response.success_url);
-                } else {
-                    $('.error-email').html(response.errors).fadeIn().delay(2000).fadeOut();
-                }
-            }).fail(function (xhr, responseText) {});
-    });
-</script>
