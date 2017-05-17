@@ -1,0 +1,9 @@
+test:
+  script:
+    - echo 'test'
+
+deploy:
+  type: deploy
+  when: manual
+  script:
+    - echo 'deploy'
