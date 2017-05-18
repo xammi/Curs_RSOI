@@ -1,8 +1,12 @@
 test:
+  tags:
+    - main
   script:
     - echo 'test'
 
 deploy:
+  tags:
+    - main
   type: deploy
   when: manual
   script:
