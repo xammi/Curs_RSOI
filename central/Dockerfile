@@ -1,19 +1,18 @@
 FROM python:3.5
 MAINTAINER Kislenko Maksim <m.kislenko@corp.mail.ru>
 
+COPY ./deploy/nova_sources.txt /etc/apt/sources.txt
 RUN apt-get update && apt-get install nginx
 
-WORKDIR /etc/nginx/sites-available
-COPY ./deploy/nginx.conf ./central.conf
+COPY ./deploy/nginx.conf /etc/nginx/sites-available/central.conf
 
 WORKDIR /etc/nginx/sites-enabled
-RUN ln -s ../sites-available/vitrine.conf ./vitrine.conf \
-    && rm -f default
+RUN ln -s ../sites-available/central.conf ./central.conf && rm -f default
 
 WORKDIR /opt/central
 COPY . .
 RUN chmod 777 ./start.sh
-EXPOSE 80
-
 RUN pip3 install -r requirements.txt
+
+EXPOSE 80
 CMD ["./start.sh"]
