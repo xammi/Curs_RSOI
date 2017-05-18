@@ -55,5 +55,5 @@ deb-src http://security.ubuntu.com/ubuntu xenial-security multiverse
 ## respective vendors as a service to Ubuntu users.
 # deb http://archive.canonical.com/ubuntu xenial partner
 # deb-src http://archive.canonical.com/ubuntu xenial partner
-deb https://apt.dockerproject.org/repo ubuntu-xenial main
-# deb-src https://apt.dockerproject.org/repo ubuntu-xenial main
+deb http://apt.dockerproject.org/repo ubuntu-xenial main
+# deb-src http://apt.dockerproject.org/repo ubuntu-xenial main
