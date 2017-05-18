@@ -3,6 +3,7 @@ test:
     - main
   script:
     - echo 'test'
+  only: master
 
 deploy:
   tags:
@@ -11,3 +12,4 @@ deploy:
   when: manual
   script:
     - echo 'deploy'
+  only: master
