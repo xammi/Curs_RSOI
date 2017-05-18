@@ -1,7 +1,7 @@
 FROM python:3.5
 MAINTAINER Kislenko Maksim <m.kislenko@corp.mail.ru>
 
-COPY ./deploy/nova_sources.txt /etc/apt/sources.txt
+COPY ./deploy/nova_sources.txt /etc/apt/sources.list
 RUN apt-get update && apt-get install nginx
 
 COPY ./deploy/nginx.conf /etc/nginx/sites-available/central.conf
