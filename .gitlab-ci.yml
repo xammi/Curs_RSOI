@@ -2,7 +2,8 @@ test:
   tags:
     - main
   script:
-    - echo 'test'
+    - echo 'Testing ...'
+    - echo 'Success'
   only: 
     - master
 
@@ -12,6 +13,8 @@ deploy:
   type: deploy
   when: manual
   script:
-    - echo 'deploy'
+    - echo 'Deploying ...'
+    - ./build.sh
+    - echo 'Success'
   only: 
     - master
