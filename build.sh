@@ -20,6 +20,7 @@ function find_projects {
 
 find_projects
 
+echo ""
 if [ -z ${PROJECTS} ]; then
     echo "Projects not found"
 else

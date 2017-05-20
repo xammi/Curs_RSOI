@@ -1,7 +1,7 @@
 FROM python:3.5
 MAINTAINER Kislenko Maksim <m.kislenko@corp.mail.ru>
 
-WORKDIR /opt/central
+WORKDIR /opt/oauth
 COPY . .
 RUN pip3 install -r requirements.txt
 RUN python manage.py migrate

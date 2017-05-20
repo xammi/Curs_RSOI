@@ -1,6 +1,4 @@
 from django import forms
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.http import HttpResponseForbidden
 from django.http import JsonResponse, HttpResponseRedirect
@@ -8,6 +6,18 @@ from django.urls import reverse
 from django.views.generic import TemplateView, DetailView, FormView, RedirectView
 
 from core.models import User, ACompany, ASite
+from core.utils import SessionsAccessor
+
+
+class LoginRequiredMixin:
+    user_email = None
+
+    def dispatch(self, request, *args, **kwargs):
+        session = request.session
+        if not session.get('authorized'):
+            return HttpResponseForbidden()
+        self.user_email = session.get('email')
+        return super().dispatch(request, *args, **kwargs)
 
 
 class AjaxFormView(FormView):
@@ -52,17 +62,20 @@ class LoginView(AjaxFormView):
     form_class = AuthForm
 
     def form_valid(self, form):
-        email = form.cleaned_data.get('email')
-        password = form.cleaned_data.get('password')
-        user = authenticate(email=email, password=password)
-        if user:
-            if user.is_active:
-                login(self.request, user)
-                return super().form_valid(form)
+        try:
+            auth_data = SessionsAccessor.send_request('/authorize', form.cleaned_data)
+            if auth_data:
+                if auth_data.get('status') == 'OK':
+                    session = self.request.session
+                    session['authorized'] = True
+                    session['email'] = form.cleaned_data.get('email')
+                    return super().form_valid(form)
+                else:
+                    error_msg = 'Ваш аккаунт не активирован'
             else:
-                error_msg = 'Ваш аккаунт не активирован'
-        else:
-            error_msg = 'Введены неправильные email или пароль'
+                error_msg = 'Введены неправильные email или пароль'
+        except ConnectionError:
+            error_msg = 'Сервис sessions в данный момент недоступен'
 
         return JsonResponse({
             'status': self.error_status,
@@ -77,7 +90,11 @@ class LogoutView(RedirectView):
     http_method_names = ['get']
 
     def get(self, request, *args, **kwargs):
-        logout(request)
+        session = self.request.session
+        if 'authorized' in session:
+            del session['authorized']
+        if 'email' in session:
+            del session['email']
         return super().get(request, *args, **kwargs)
 
     def get_redirect_url(self, *args, **kwargs):
@@ -89,15 +106,28 @@ class ProfileView(LoginRequiredMixin, DetailView):
     template_name = 'core/profile.html'
     context_object_name = 'user'
 
+    def get(self, request, *args, **kwargs):
+        try:
+            self.object = None
+            result = SessionsAccessor.send_request('/identify', {'email': self.user_email})
+            self.object = result if result else None
+        except ConnectionError:
+            pass
+        return super().get(request, *args, **kwargs)
+
     def get_object(self, queryset=None):
-        return self.request.user
+        return self.object
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        if self.object.role == User.ADVISER:
+        if self.object:
+            context.update(self.object)
+
+        role = context.get('role')
+        if role == User.ADVISER:
             context['my_companies'] = ACompany.objects.all()
-        elif self.object.role == User.SITE_OWNER:
+        elif role == User.SITE_OWNER:
             context['my_sites'] = ASite.objects.all()
 
         context['SITE_TOPICS'] = ASite.TOPICS
@@ -122,27 +152,32 @@ class RegisterView(AjaxFormView):
                 raise ValidationError({'confirm': 'Пароли не совпадают'})
             return cleaned_data
 
-        def save(self, commit=True):
-            instance = super().save(commit=False)
-            instance.email = User.objects.normalize_email(self.cleaned_data.get('email'))
-            instance.set_password(self.cleaned_data.get('password'))
-            if commit:
-                instance.save()
-            return instance
-
     http_method_names = ['post']
     form_class = RegisterForm
 
     def dispatch(self, request, *args, **kwargs):
-        if request.user.is_authenticated():
+        if request.session.get('authorized'):
             return HttpResponseRedirect(self.get_success_url())
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
-        instance = form.save(commit=False)
-        instance.is_active = True
-        instance.save()
-        login(self.request, instance)
+        try:
+            result = SessionsAccessor.send_request('/create', form.cleaned_data)
+            if result.get('status') != 'OK':
+                return JsonResponse({
+                    'status': self.error_status,
+                    'errors': result.get('errors'),
+                })
+
+        except ConnectionError:
+            return JsonResponse({
+                'status': self.error_status,
+                'errors': 'Сервис sessions в данный момент не доступен'
+            })
+
+        session = self.request.session
+        session['authorized'] = True
+        session['email'] = form.cleaned_data.get('email')
         return super().form_valid(form)
 
     def get_success_url(self):

@@ -11,20 +11,20 @@
 {% endblock %}
 
 {% block left_nav %}
-    {% if user.role == ADVISER %}
+    {% if role == ADVISER %}
         <li><a href="#" class="js-add-form">Новая компания</a></li>
-    {% elif user.role == SITE_OWNER %}
+    {% elif role == SITE_OWNER %}
         <li><a href="#" class="js-add-form">Новая площадка</a></li>
     {% endif %}
 {% endblock %}
 
 {% block content %}
     <div class="content-inner" style="margin: 0 5%">
-        <h3>ЛК - {{ user.get_full_name }}</h3>
-        <p>Email: {{ user.email }}</p>
-        <p>Роль: {{ user.get_human_role }}</p>
+        <h3>ЛК - {{ full_name }}</h3>
+        <p>Email: {{ email }}</p>
+        <p>Роль: {{ role }}</p>
         <br>
-        {% if user.role == ADVISER %}
+        {% if role == ADVISER %}
             <h4>1. Платёжные данные</h4>
             <p>Здесь пока ничего нет</p>
             <br>
@@ -45,7 +45,7 @@
                     {% endfor %}
                 {% endif %}
             </div>
-        {% elif user.role == SITE_OWNER %}
+        {% elif role == SITE_OWNER %}
             <h4>1. Мои рекламные площадки</h4>
             <div class="js-sites">
                 {% if not my_sites %}
@@ -69,7 +69,7 @@
 
 {% block modals %}
     <div id="add-modal" class="mfp-hide white-modal">
-        {% if user.role == ADVISER %}
+        {% if role == ADVISER %}
             {% include 'core/blocks/company_form.html' %}
         {% else %}
             {% include 'core/blocks/site_form.html' %}

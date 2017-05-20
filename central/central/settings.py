@@ -27,6 +27,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['95.163.32.114']
 
+SITE_URL = 'http://95.163.32.114:8000'
+
+SESSIONS_URL = 'http://95.163.32.114:8001'
+
 
 # Application definition
 
@@ -107,3 +111,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+# ACCESS
+
+SESSIONS_ID = 'EftqgfZ8YCxmUSa7tLIm9NZYW3X0hLhzktyUlwHV'
+SESSIONS_SECRET = 'It9aTzpJP9bzS1KLCEyPi8xBsB1WPxHpMxbArCec7tT7ifky5RodBHeiOzJ9lMEv8tkb9Fzs4Zc1zLY5Uqj43OQKVWq15QmN5dPtHxl2wEmlL0ZKPJppAElyfs6cO9Jm'

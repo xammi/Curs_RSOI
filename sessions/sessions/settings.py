@@ -25,7 +25,17 @@ SECRET_KEY = '@s8l3#q!lk)jy@237)6=4qv=8!v2z2flga42__o$flw-($reb%'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['95.163.32.114']
+
+SITE_URL = 'http://95.163.32.114:8001'
+
+EXTERNAL_ACCESS = {
+    'EftqgfZ8YCxmUSa7tLIm9NZYW3X0hLhzktyUlwHV': {
+        'name': 'central',
+        'client_id': 'EftqgfZ8YCxmUSa7tLIm9NZYW3X0hLhzktyUlwHV',
+        'client_secret': 'It9aTzpJP9bzS1KLCEyPi8xBsB1WPxHpMxbArCec7tT7ifky5RodBHeiOzJ9lMEv8tkb9Fzs4Zc1zLY5Uqj43OQKVWq15QmN5dPtHxl2wEmlL0ZKPJppAElyfs6cO9Jm',
+    }
+}
 
 
 # Application definition
@@ -37,6 +47,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+] + [
+    'core',
 ]
 
 MIDDLEWARE = [
@@ -49,7 +61,9 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'oauth.urls'
+ROOT_URLCONF = 'sessions.urls'
+
+AUTH_USER_MODEL = 'core.User'
 
 TEMPLATES = [
     {
@@ -67,7 +81,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'oauth.wsgi.application'
+WSGI_APPLICATION = 'sessions.wsgi.application'
 
 
 # Database
