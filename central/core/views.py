@@ -4,6 +4,7 @@ from django.http import HttpResponseForbidden
 from django.http import JsonResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.views.generic import TemplateView, DetailView, FormView, RedirectView
+from requests import ReadTimeout, ConnectionError
 
 from core.models import User, ACompany, ASite
 from core.utils import SessionsAccessor
@@ -63,7 +64,7 @@ class LoginView(AjaxFormView):
 
     def form_valid(self, form):
         try:
-            auth_data = SessionsAccessor.send_request('/authorize', form.cleaned_data)
+            auth_data = SessionsAccessor.send_request('/authenticate/', form.cleaned_data)
             if auth_data:
                 if auth_data.get('status') == 'OK':
                     session = self.request.session
@@ -74,7 +75,7 @@ class LoginView(AjaxFormView):
                     error_msg = 'Ваш аккаунт не активирован'
             else:
                 error_msg = 'Введены неправильные email или пароль'
-        except ConnectionError:
+        except (ConnectionError, ReadTimeout):
             error_msg = 'Сервис sessions в данный момент недоступен'
 
         return JsonResponse({
@@ -109,9 +110,9 @@ class ProfileView(LoginRequiredMixin, DetailView):
     def get(self, request, *args, **kwargs):
         try:
             self.object = None
-            result = SessionsAccessor.send_request('/identify', {'email': self.user_email})
+            result = SessionsAccessor.send_request('/identify/', {'email': self.user_email})
             self.object = result if result else None
-        except ConnectionError:
+        except (ConnectionError, ReadTimeout):
             pass
         return super().get(request, *args, **kwargs)
 
@@ -162,14 +163,14 @@ class RegisterView(AjaxFormView):
 
     def form_valid(self, form):
         try:
-            result = SessionsAccessor.send_request('/create', form.cleaned_data)
+            result = SessionsAccessor.send_request('/create/', form.cleaned_data)
             if result.get('status') != 'OK':
                 return JsonResponse({
                     'status': self.error_status,
                     'errors': result.get('errors'),
                 })
 
-        except ConnectionError:
+        except (ConnectionError, ReadTimeout):
             return JsonResponse({
                 'status': self.error_status,
                 'errors': 'Сервис sessions в данный момент не доступен'

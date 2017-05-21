@@ -1,8 +1,11 @@
 from urllib.parse import urljoin
 
+from datetime import datetime
 import requests
+import json
 from django.conf import settings
 from django.utils import timezone
+from django.utils.dateparse import parse_date
 
 
 class SessionsAccessor:
@@ -41,14 +44,16 @@ class SessionsAccessor:
             print('Error when getting sessions token: code={}'.format(response))
             raise ConnectionError(response.status_code)
 
-        cls.prev_token = response.content
+        cls.prev_token = json.loads(response.text)
+        if 'expires_in' in cls.prev_token:
+            cls.prev_token['expires_in'] = parse_date(cls.prev_token['expires_in'])
         return cls.prev_token.get('access_token')
 
     @classmethod
     def send_request(cls, method, data):
         token = cls.get_token()
 
-        auth_url = urljoin(settings.SESSIONS_URL, '/user/', method)
+        auth_url = urljoin(settings.SESSIONS_URL, '/user' + method)
         auth_headers = {'Authorization': 'Bearer:{0}'.format(token)}
 
         response = requests.post(auth_url, headers=auth_headers, data=data, timeout=2)

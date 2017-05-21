@@ -5,6 +5,7 @@ from urllib.parse import unquote_plus
 from django import forms
 from django.contrib.auth import authenticate
 from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseForbidden, HttpResponseNotFound
+from django.utils import timezone
 from django.views import View
 
 from core.models import User, TemporalGrant
@@ -12,7 +13,7 @@ from sessions.settings import EXTERNAL_ACCESS
 
 
 class TokenView(View):
-    http_method_names = ['POST']
+    http_method_names = ['post']
     grant_type = 'client_credentials'
 
     def post(self, request, *args, **kwargs):
@@ -39,30 +40,13 @@ class CheckGrantMixin(object):
     grant_type = TemporalGrant.BEARER_TYPE
 
     def has_access(self, request):
-        auth_string = request.META.get('HTTP_AUTHORIZATION')
-        auth_parts = auth_string.split(' ', 1)
-        if len(auth_parts) != 2:
-            return False
+        auth_header = request.META.get('HTTP_AUTHORIZATION')
+        if not auth_header.startswith('Bearer'):
+            return HttpResponseBadRequest()
 
-        client_grant_type, auth_string = auth_parts
-        if client_grant_type != self.grant_type:
-            return False
-
-        try:
-            b64_dec = base64.b64decode(auth_string)
-        except (TypeError, binascii.Error):
-            return False
-
-        try:
-            encoding = request.charset if hasattr(request, 'charset') else 'utf-8'
-            auth_decoded = b64_dec.decode(encoding)
-        except UnicodeDecodeError:
-            return False
-
-        client_id, client_secret = map(unquote_plus, auth_decoded.split(':', 1))
-        app_data = EXTERNAL_ACCESS.get(client_id)
-        app_real_secret = app_data.get('client_secret')
-        return app_real_secret == client_secret
+        token = auth_header[7:]
+        now = timezone.now()
+        return TemporalGrant.objects.filter(access_token=token, expires_in__gt=now).exists()
 
     def dispatch(self, request, *args, **kwargs):
         if not self.has_access(request):
@@ -71,7 +55,7 @@ class CheckGrantMixin(object):
 
 
 class IdentifyView(CheckGrantMixin, View):
-    http_method_names = ['GET']
+    http_method_names = ['get']
 
     def get(self, request, *args, **kwargs):
         email = request.GET.get('email')
@@ -85,11 +69,11 @@ class IdentifyView(CheckGrantMixin, View):
 
 
 class AuthenticateView(CheckGrantMixin, View):
-    http_method_names = ['POST']
+    http_method_names = ['post']
 
     def post(self, request, *args, **kwargs):
-        email = request.GET.get('email')
-        password = request.GET.get('password')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
         if not email or not password:
             return HttpResponseBadRequest()
 
@@ -102,7 +86,7 @@ class AuthenticateView(CheckGrantMixin, View):
 
 
 class CreateUserView(CheckGrantMixin, View):
-    http_method_names = ['POST']
+    http_method_names = ['post']
 
     class RegisterForm(forms.ModelForm):
         class Meta:

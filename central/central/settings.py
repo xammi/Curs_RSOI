@@ -23,7 +23,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'ba#49_q1h-a2qzgs+skvhb+2q+7hr$6sdpp_yar*4gp4ib-0og'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['95.163.32.114']
 
@@ -117,3 +117,8 @@ STATIC_URL = '/static/'
 
 SESSIONS_ID = 'EftqgfZ8YCxmUSa7tLIm9NZYW3X0hLhzktyUlwHV'
 SESSIONS_SECRET = 'It9aTzpJP9bzS1KLCEyPi8xBsB1WPxHpMxbArCec7tT7ifky5RodBHeiOzJ9lMEv8tkb9Fzs4Zc1zLY5Uqj43OQKVWq15QmN5dPtHxl2wEmlL0ZKPJppAElyfs6cO9Jm'
+
+try:
+    from .local_settings import *
+except ImportError:
+    pass
