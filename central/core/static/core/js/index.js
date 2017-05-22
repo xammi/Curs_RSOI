@@ -27,7 +27,7 @@ $(document).ready(function () {
             }.bind(this))
             .fail(function (xhr, responseText) {});
     });
-    $('#js-register').submit(function (event) {
+    $('.js-register').submit(function (event) {
         event.preventDefault();
         $('.error').fadeOut();
         $.post($(this).attr('action'), $(this).serialize())

@@ -64,8 +64,8 @@ class IndexView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['ADVISER'] = ADVISER
-        context['SITE_OWNER'] = SITE_OWNER
+        context['ADVISER'] = 0  # ADVISER
+        context['SITE_OWNER'] = 1  # SITE_OWNER
         return context
 
 
