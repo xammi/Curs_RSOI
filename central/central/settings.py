@@ -31,6 +31,8 @@ SITE_URL = 'http://95.163.32.114:8000'
 
 SESSIONS_URL = 'http://95.163.32.114:8001'
 
+TARGET_URL = 'http://95.163.32.114:8001'
+
 
 # Application definition
 
@@ -74,6 +76,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'core.processors.is_authenticated',
             ],
         },
     },
@@ -117,6 +120,9 @@ STATIC_URL = '/static/'
 
 SESSIONS_ID = 'EftqgfZ8YCxmUSa7tLIm9NZYW3X0hLhzktyUlwHV'
 SESSIONS_SECRET = 'It9aTzpJP9bzS1KLCEyPi8xBsB1WPxHpMxbArCec7tT7ifky5RodBHeiOzJ9lMEv8tkb9Fzs4Zc1zLY5Uqj43OQKVWq15QmN5dPtHxl2wEmlL0ZKPJppAElyfs6cO9Jm'
+
+TARGET_ID = 'qkoerckHSfpCveBLpbpQpJehADDaQvQMYoVScvgn'
+TARGET_SECRET = 'cnLSKSgHJAuZqlMErnLeRNefkbBvCaIVQyIhIFXKfcVjnwxxsoAIXNVNqfJNNjcZcZLBpoVAKXQBhUnfZNVWCsiTyxnuGyNCRFQKKbpOlEvneuGwJLTSNrDtgbSFkgHS'
 
 try:
     from .local_settings import *

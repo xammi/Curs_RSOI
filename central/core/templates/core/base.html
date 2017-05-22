@@ -31,8 +31,8 @@
                 </ul>
                 <ul class="nav navbar-nav navbar-right" id="right-navbar">
                     {% block right_nav %}
-                        {% if user.is_authenticated %}
-                            <li><a href="{% url 'core:profile' %}">{{ user.email }}</a></li>
+                        {% if user_authorized %}
+                            <li><a href="{% url 'core:profile' %}">{{ user_email }}</a></li>
                             <li><a href="{% url 'core:logout' %}">Выйти</a></li>
                         {% else %}
                             <li class="dropdown">
@@ -52,6 +52,15 @@
         </div>
     </nav>
     <div class="content">
+        {% block messages %}
+            {% if messages %}
+                <ul class="message-global">
+                    {% for message in messages %}
+                        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endblock %}
         {% block content %}{% endblock %}
         {% block modals %}{% endblock %}
     </div>

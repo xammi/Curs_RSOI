@@ -1,4 +1,5 @@
 from django import forms
+from django.contrib.messages import add_message, ERROR
 from django.core.exceptions import ValidationError
 from django.http import HttpResponseForbidden
 from django.http import JsonResponse, HttpResponseRedirect
@@ -11,13 +12,13 @@ from core.utils import SessionsAccessor
 
 
 class LoginRequiredMixin:
-    user_email = None
+    user_id = None
 
     def dispatch(self, request, *args, **kwargs):
         session = request.session
         if not session.get('authorized'):
             return HttpResponseForbidden()
-        self.user_email = session.get('email')
+        self.user_id = session.get('user_id')
         return super().dispatch(request, *args, **kwargs)
 
 
@@ -69,6 +70,7 @@ class LoginView(AjaxFormView):
                 if auth_data.get('status') == 'OK':
                     session = self.request.session
                     session['authorized'] = True
+                    session['user_id'] = auth_data.get('data')
                     session['email'] = form.cleaned_data.get('email')
                     return super().form_valid(form)
                 else:
@@ -94,6 +96,8 @@ class LogoutView(RedirectView):
         session = self.request.session
         if 'authorized' in session:
             del session['authorized']
+        if 'user_id' in session:
+            del session['user_id']
         if 'email' in session:
             del session['email']
         return super().get(request, *args, **kwargs)
@@ -110,10 +114,10 @@ class ProfileView(LoginRequiredMixin, DetailView):
     def get(self, request, *args, **kwargs):
         try:
             self.object = None
-            result = SessionsAccessor.send_request('/identify/', {'email': self.user_email})
+            result = SessionsAccessor.send_request('/identify/', {'id': self.user_id}, method='get')
             self.object = result if result else None
         except (ConnectionError, ReadTimeout):
-            pass
+            add_message(request, ERROR, u'Сервис sessions в данный момент недоступен')
         return super().get(request, *args, **kwargs)
 
     def get_object(self, queryset=None):
@@ -132,8 +136,8 @@ class ProfileView(LoginRequiredMixin, DetailView):
             context['my_sites'] = ASite.objects.all()
 
         context['SITE_TOPICS'] = ASite.TOPICS
-        context['ADVISER'] = User.ADVISER
-        context['SITE_OWNER'] = User.SITE_OWNER
+        context['ADVISER'] = 'Рекламодатель'
+        context['SITE_OWNER'] = 'Владелец сайта'
         return context
 
 
@@ -173,12 +177,14 @@ class RegisterView(AjaxFormView):
         except (ConnectionError, ReadTimeout):
             return JsonResponse({
                 'status': self.error_status,
-                'errors': 'Сервис sessions в данный момент не доступен'
+                'errors': {'email': 'Сервис sessions в данный момент не доступен'},
             })
 
-        session = self.request.session
-        session['authorized'] = True
-        session['email'] = form.cleaned_data.get('email')
+        if result.get('status') == 'OK':
+            session = self.request.session
+            session['authorized'] = True
+            session['user_id'] = result.get('data').get('id')
+            session['email'] = result.get('data').get('email')
         return super().form_valid(form)
 
     def get_success_url(self):

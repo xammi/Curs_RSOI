@@ -1,18 +1,18 @@
 from urllib.parse import urljoin
 
-from datetime import datetime
 import requests
 import json
+
+from requests import ConnectionError
 from django.conf import settings
 from django.utils import timezone
 from django.utils.dateparse import parse_date
 
 
-class SessionsAccessor:
-    client_id = settings.SESSIONS_ID
-    client_secret = settings.SESSIONS_SECRET
-    service_url = settings.SESSIONS_URL
-    prev_token = {'access_token': '', 'expires_in': None}
+class Accessor:
+    client_id = None
+    client_secret= None
+    service_url = None
 
     @classmethod
     def is_token_actual(cls):
@@ -50,13 +50,17 @@ class SessionsAccessor:
         return cls.prev_token.get('access_token')
 
     @classmethod
-    def send_request(cls, method, data):
+    def send_request(cls, route, data, method='post'):
         token = cls.get_token()
 
-        auth_url = urljoin(settings.SESSIONS_URL, '/user' + method)
+        auth_url = urljoin(settings.SESSIONS_URL, '/user' + route)
         auth_headers = {'Authorization': 'Bearer:{0}'.format(token)}
 
-        response = requests.post(auth_url, headers=auth_headers, data=data, timeout=2)
+        if method == 'get':
+            response = requests.get(url=auth_url, headers=auth_headers, params=data, timeout=2)
+        else:
+            response = requests.post(url=auth_url, headers=auth_headers, data=data, timeout=2)
+
         if response.status_code == 404:
             return None
 
@@ -64,4 +68,18 @@ class SessionsAccessor:
             print('Error when authorizing: code={}'.format(response))
             raise ConnectionError(response.status_code)
 
-        return response.content
+        return json.loads(response.text)
+
+
+class SessionsAccessor(Accessor):
+    client_id = settings.SESSIONS_ID
+    client_secret = settings.SESSIONS_SECRET
+    service_url = settings.SESSIONS_URL
+    prev_token = {'access_token': '', 'expires_in': None}
+
+
+class TargetAccessor(Accessor):
+    client_id = settings.TARGET_ID
+    client_secret = settings.TARGET_SECRET
+    service_url = settings.TARGET_URL
+    prev_token = {'access_token': '', 'expires_in': None}
