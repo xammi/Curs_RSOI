@@ -1,7 +1,7 @@
 from django.conf.urls import url
 
 from core.views import IndexView, ProfileView, LoginView, LogoutView, RegisterView, AddSiteView, SiteDetailView, \
-    AddCompanyView, CompanyDetailView
+    AddCompanyView, CompanyDetailView, AddImageView, DropImageView
 
 urlpatterns = [
     url('^$', IndexView.as_view(), name='home'),
@@ -16,4 +16,7 @@ urlpatterns = [
     url('^site/details/(?P<site_id>[\d\w\-]+)/$', SiteDetailView.as_view(), name='site_details'),
     url('^company/add/$', AddCompanyView.as_view(), name='add_company'),
     url('^company/details/(?P<company_id>[\d\w\-]+)/$', CompanyDetailView.as_view(), name='company_details'),
+
+    url('^image/add/(?P<company_id>[\d\w\-]+)/$', AddImageView.as_view(), name='add_image'),
+    url('^image/drop/(?P<image_id>[\d\w\-]+)/$', DropImageView.as_view(), name='drop_image'),
 ]

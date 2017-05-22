@@ -1,3 +1,12 @@
+from django.conf import settings
+
+
+def service_domains(request):
+    return {
+        'target_domain': settings.TARGET_URL
+    }
+
+
 def is_authenticated(request):
     session = request.session
     if not session.get('authorized'):

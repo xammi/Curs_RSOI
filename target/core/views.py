@@ -2,7 +2,7 @@ from django import forms
 from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseNotFound
 from django.views import View
 
-from core.models import ASite, ACompany
+from core.models import ASite, ACompany, ImageAttachment
 from grant.views import CheckGrantMixin
 
 
@@ -75,14 +75,21 @@ class DetailView(CheckGrantMixin, View):
     pk_url_name = 'uuid'
     model = None
 
+    def extra_data(self, obj):
+        return {}
+
     def get(self, request, *args, **kwargs):
         obj_id = kwargs.get(self.pk_url_name)
         if not obj_id:
             return HttpResponseBadRequest()
+
         obj = self.model.objects.filter(id=obj_id).first()
         if not obj:
             return HttpResponseNotFound()
-        return JsonResponse(obj.as_dict())
+
+        result = obj.as_dict()
+        result.update(self.extra_data(obj))
+        return JsonResponse(result)
 
 
 class SiteDetailView(DetailView):
@@ -91,3 +98,37 @@ class SiteDetailView(DetailView):
 
 class CompanyDetailView(DetailView):
     model = ACompany
+
+    def extra_data(self, obj):
+        return {'images': [
+            i.as_dict() for i in obj.imageattachment_set.all()
+        ]}
+
+
+class CreateImageView(CheckGrantMixin, View):
+    http_method_names = ['post']
+
+    class CreateForm(forms.ModelForm):
+        class Meta:
+            model = ImageAttachment
+            fields = ('company', 'image')
+
+    def post(self, request, *args, **kwargs):
+        form = CreateImageView.CreateForm(data=request.POST, files=request.FILES)
+        if form.is_valid():
+            # check ownership before add
+            image = form.save()
+            return JsonResponse({'status': 'OK', 'image_url': image.image.url})
+        return JsonResponse({'status': 'ERROR', 'errors': form.errors})
+
+
+class DeleteImageView(CheckGrantMixin, View):
+    http_method_names = ['post']
+
+    def post(self, request, *args, **kwargs):
+        image_id = request.POST.get('image')
+        if not image_id:
+            return HttpResponseBadRequest()
+
+        ImageAttachment.objects.filter(id=image_id).delete()
+        return JsonResponse({'status': 'OK'})

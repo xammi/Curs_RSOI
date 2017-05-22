@@ -1,9 +1,60 @@
 {% extends 'core/base.html' %}
 {% load static core_tags %}
 
+{% block css %}
+    <link rel="stylesheet" href="{% static 'libs/css/fileinput.min.css' %}">
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'libs/js/fileinput.min.js' %}"></script>
+    <script src="{% static 'libs/js/plugins/canvas-to-blob.min.js' %}"></script>
+    <script src="{% static 'libs/js/plugins/purify.min.js' %}"></script>
+    <script src="{% static 'libs/js/plugins/sortable.min.js' %}"></script>
+    <script src="{% static 'libs/js/themes/theme.min.js' %}"></script>
+    <script src="{% static 'libs/js/locales/ru.js' %}"></script>
+{% endblock %}
+
 {% block content %}
     <div class="content-inner" style="margin: 0 5%">
         <h3>Детали по компании: {{ company|key:'title' }}</h3><br>
+        <div class="add_image">
+            <form action="#" class="js-add-image form-horizontal" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <div class="col-sm-9">
+                        <input type="file" id="id_image" name="image[]" class="file-loading" accept="image/*" multiple>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <br>
+        <hr>
         <a href="{% url 'core:profile' %}">Назад к профилю</a>
     </div>
+{% endblock %}
+
+{% block body_js %}
+    <script>
+        var extraData = {
+            csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val()
+        };
+        $("#id_image").fileinput({
+            previewFileType: "image",
+            allowedFileExtensions: ["png", "jpg"],
+            maxFileSize: 30000,
+            maxFileCount: 3,
+
+            uploadUrl: "{% url 'core:add_image' company|key:'id' %}",
+            uploadExtraData: extraData,
+
+            overwriteInitial: false,
+            initialPreviewAsData: true,
+            initialPreview: [
+                {% for i in company|key:'images' %}'{{ target_domain }}{{ i|key:'url' }}',{% endfor %}
+            ],
+            initialPreviewConfig: [
+                {% for i in company|key:'images' %} {url: '{% url 'core:drop_image' i|key:'id' %}', extra: extraData },{% endfor %}
+            ]
+        });
+    </script>
 {% endblock %}

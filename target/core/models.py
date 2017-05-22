@@ -53,6 +53,12 @@ class ImageAttachment(DefaultModel):
     def __str__(self):
         return '{} Image {}'.format(self.company, self.id)
 
+    def as_dict(self):
+        return {
+            'id': self.id,
+            'url': self.image.url,
+        }
+
 
 class ASite(DefaultModel):
     FORUM = 0

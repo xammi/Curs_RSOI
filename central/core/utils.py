@@ -50,7 +50,7 @@ class Accessor:
         return cls.prev_token.get('access_token')
 
     @classmethod
-    def send_request(cls, route, data, method='post'):
+    def send_request(cls, route, data, method='post', file=None):
         token = cls.get_token()
 
         auth_url = urljoin(cls.service_url, route)
@@ -59,7 +59,8 @@ class Accessor:
         if method == 'get':
             response = requests.get(url=auth_url, headers=auth_headers, params=data, timeout=2)
         else:
-            response = requests.post(url=auth_url, headers=auth_headers, data=data, timeout=2)
+            files = {'image': file} if file else None
+            response = requests.post(url=auth_url, headers=auth_headers, data=data, timeout=2, files=files)
 
         if response.status_code == 404:
             return None

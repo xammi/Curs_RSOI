@@ -1,7 +1,9 @@
 from django.conf.urls import url
+from django.conf.urls.static import static
+from django.conf import settings
 
 from core.views import CreateSiteView, CreateCompanyView, SiteListView, CompanyListView, SiteDetailView, \
-    CompanyDetailView
+    CompanyDetailView, CreateImageView, DeleteImageView
 
 urlpatterns = [
     url(r'^site/create/$', CreateSiteView.as_view()),
@@ -11,4 +13,8 @@ urlpatterns = [
     url(r'^company/create/$', CreateCompanyView.as_view()),
     url(r'^company/list/$', CompanyListView.as_view()),
     url(r'^company/(?P<uuid>[\w\d\-]+)/$', CompanyDetailView.as_view()),
+
+    url(r'^image/create/$', CreateImageView.as_view()),
+    url(r'^image/delete/$', DeleteImageView.as_view()),
 ]
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

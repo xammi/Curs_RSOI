@@ -1,9 +1,10 @@
 from django import forms
 from django.contrib.messages import add_message, ERROR
 from django.core.exceptions import ValidationError
-from django.http import HttpResponseForbidden, HttpResponseNotFound
+from django.http import HttpResponseForbidden, HttpResponseNotFound, HttpResponse, HttpResponseBadRequest
 from django.http import JsonResponse, HttpResponseRedirect
 from django.urls import reverse
+from django.views import View
 from django.views.generic import TemplateView, DetailView, FormView, RedirectView
 from requests import ReadTimeout, ConnectionError
 
@@ -310,3 +311,45 @@ class CompanyDetailView(ProxyDetailView):
     pk_url_name = 'company_id'
     target_route = '/company/{}/'
 
+
+class AddImageView(LoginRequiredMixin, View):
+    http_method_names = ['post']
+
+    def post(self, request, *args, **kwargs):
+        uuid = kwargs.get('company_id')
+        image = request.FILES.get('image[]')
+        if not image or not uuid:
+            return HttpResponseBadRequest()
+
+        try:
+            result = TargetAccessor.send_request('/image/create/', {'company': uuid, 'owner': self.user_id}, file=image)
+            if not result:
+                return HttpResponseBadRequest()
+
+            if result.get('status') == 'OK':
+                return JsonResponse({'status': 'OK'})
+
+            error = list(result.get('errors', {}).items())
+            if error:
+                return JsonResponse({'error': '{}: {}'.format(*error[0])})
+
+        except (ConnectionError, ReadTimeout):
+            return JsonResponse({'error': 'Сервис target в данный момент не доступен'})
+
+
+class DropImageView(LoginRequiredMixin, View):
+    http_method_names = ['post']
+
+    def post(self, request, *args, **kwargs):
+        uuid = kwargs.get('image_id')
+        if not uuid:
+            return HttpResponseBadRequest()
+
+        try:
+            result = TargetAccessor.send_request('/image/delete/', {'image': uuid, 'owner': self.user_id})
+            if not result:
+                return HttpResponseBadRequest()
+            return JsonResponse({'status': 'OK'})
+
+        except (ConnectionError, ReadTimeout):
+            return JsonResponse({'error': 'Сервис target в данный момент не доступен'})
