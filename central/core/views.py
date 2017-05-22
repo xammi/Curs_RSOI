@@ -1,14 +1,28 @@
 from django import forms
 from django.contrib.messages import add_message, ERROR
 from django.core.exceptions import ValidationError
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, HttpResponseNotFound
 from django.http import JsonResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.views.generic import TemplateView, DetailView, FormView, RedirectView
 from requests import ReadTimeout, ConnectionError
 
 from core.models import User, ACompany, ASite
-from core.utils import SessionsAccessor
+from core.utils import SessionsAccessor, TargetAccessor
+
+
+ADVISER = 'Рекламодатель'
+SITE_OWNER = 'Владелец сайта'
+
+TOPICS = (
+    (0, 'Форум'),
+    (1, 'Сайт-визитка'),
+    (2, 'Интернет-магазин'),
+    (3, 'Социальная сеть'),
+    (4, 'Игра'),
+    (5, 'Инструмент'),
+    (6, 'Блог'),
+)
 
 
 class LoginRequiredMixin:
@@ -50,8 +64,8 @@ class IndexView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['ADVISER'] = User.ADVISER
-        context['SITE_OWNER'] = User.SITE_OWNER
+        context['ADVISER'] = ADVISER
+        context['SITE_OWNER'] = SITE_OWNER
         return context
 
 
@@ -65,7 +79,7 @@ class LoginView(AjaxFormView):
 
     def form_valid(self, form):
         try:
-            auth_data = SessionsAccessor.send_request('/authenticate/', form.cleaned_data)
+            auth_data = SessionsAccessor.send_request('/user/authenticate/', form.cleaned_data)
             if auth_data:
                 if auth_data.get('status') == 'OK':
                     session = self.request.session
@@ -114,7 +128,7 @@ class ProfileView(LoginRequiredMixin, DetailView):
     def get(self, request, *args, **kwargs):
         try:
             self.object = None
-            result = SessionsAccessor.send_request('/identify/', {'id': self.user_id}, method='get')
+            result = SessionsAccessor.send_request('/user/identify/', {'id': self.user_id}, method='get')
             self.object = result if result else None
         except (ConnectionError, ReadTimeout):
             add_message(request, ERROR, u'Сервис sessions в данный момент недоступен')
@@ -128,27 +142,40 @@ class ProfileView(LoginRequiredMixin, DetailView):
 
         if self.object:
             context.update(self.object)
+            role = self.object.get('role')
+            params = {'owner': self.user_id}
 
-        role = context.get('role')
-        if role == User.ADVISER:
-            context['my_companies'] = ACompany.objects.all()
-        elif role == User.SITE_OWNER:
-            context['my_sites'] = ASite.objects.all()
+            if role == ADVISER:
+                try:
+                    result = TargetAccessor.send_request('/company/list/', params, method='get')
+                    context['my_companies'] = result.get('data')
+                except (ConnectionError, ReadTimeout):
+                    add_message(self.request, ERROR, u'Сервис target в данный момент недоступен')
+
+            elif role == SITE_OWNER:
+                try:
+                    result = TargetAccessor.send_request('/site/list/', params, method='get')
+                    context['my_sites'] = result.get('data')
+                except (ConnectionError, ReadTimeout):
+                    add_message(self.request, ERROR, u'Сервис target в данный момент недоступен')
 
         context['SITE_TOPICS'] = ASite.TOPICS
-        context['ADVISER'] = 'Рекламодатель'
-        context['SITE_OWNER'] = 'Владелец сайта'
+        context['ADVISER'] = ADVISER
+        context['SITE_OWNER'] = SITE_OWNER
         return context
 
 
 class RegisterView(AjaxFormView):
-    class RegisterForm(forms.ModelForm):
+    http_method_names = ['post']
+
+    class RegisterForm(forms.Form):
+        email = forms.EmailField(max_length=128)
+        first_name = forms.CharField(max_length=128, required=False)
+        last_name = forms.CharField(max_length=128, required=False)
+        role = forms.ChoiceField(choices=((0, ADVISER), (1, SITE_OWNER)))
+
         password = forms.CharField(max_length=128)
         confirm = forms.CharField(max_length=128)
-
-        class Meta:
-            model = User
-            fields = ('email', 'first_name', 'last_name', 'role')
 
         def clean(self):
             cleaned_data = super().clean()
@@ -157,7 +184,6 @@ class RegisterView(AjaxFormView):
                 raise ValidationError({'confirm': 'Пароли не совпадают'})
             return cleaned_data
 
-    http_method_names = ['post']
     form_class = RegisterForm
 
     def dispatch(self, request, *args, **kwargs):
@@ -167,12 +193,9 @@ class RegisterView(AjaxFormView):
 
     def form_valid(self, form):
         try:
-            result = SessionsAccessor.send_request('/create/', form.cleaned_data)
+            result = SessionsAccessor.send_request('/user/create/', form.cleaned_data)
             if result.get('status') != 'OK':
-                return JsonResponse({
-                    'status': self.error_status,
-                    'errors': result.get('errors'),
-                })
+                return JsonResponse({'status': self.error_status, 'errors': result.get('errors')})
 
         except (ConnectionError, ReadTimeout):
             return JsonResponse({
@@ -183,103 +206,116 @@ class RegisterView(AjaxFormView):
         if result.get('status') == 'OK':
             session = self.request.session
             session['authorized'] = True
-            session['user_id'] = result.get('data').get('id')
-            session['email'] = result.get('data').get('email')
+            session['user_id'] = result.get('data', {}).get('id')
+            session['email'] = result.get('data', {}).get('email')
         return super().form_valid(form)
 
     def get_success_url(self):
         return reverse('core:profile')
 
 
-class AddSiteView(AjaxFormView):
-    class AddSiteForm(forms.ModelForm):
-        class Meta:
-            model = ASite
-            fields = ('title', 'link', 'topic')
-
-        def __init__(self, user, *args, **kwargs):
-            super().__init__(*args, **kwargs)
-            self.user = user
-
-        def save(self, commit=True):
-            instance = super().save(commit=False)
-            instance.owner = self.user
-            if commit:
-                instance.save()
-            return instance
-
+class AddSiteView(LoginRequiredMixin, AjaxFormView):
     http_method_names = ['post']
+
+    class AddSiteForm(forms.Form):
+        topic = forms.ChoiceField(choices=TOPICS)
+        title = forms.CharField(max_length=100)
+        link = forms.URLField(max_length=256)
+
     form_class = AddSiteForm
 
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['user'] = self.request.user
-        return kwargs
-
     def form_valid(self, form):
-        instance = form.save()
-        return JsonResponse({
-            'status': self.ok_status,
-            'data': instance.as_json()
-        })
+        form.cleaned_data['owner'] = self.user_id
+        try:
+            result = TargetAccessor.send_request('/site/create/', form.cleaned_data)
+            if result.get('status') != 'OK':
+                return JsonResponse({'status': self.error_status, 'errors': result.get('errors')})
+
+            site_data = result.get('data')
+            site_data['details_url'] = reverse('core:site_details', args=[site_data.get('id')])
+            return JsonResponse({'status': self.ok_status, 'data': site_data})
+
+        except (ConnectionError, ReadTimeout):
+            return JsonResponse({
+                'status': 'ERROR',
+                'errors': {'title': 'Сервис target в данный момент не доступен'},
+            })
 
 
-class SiteDetailView(LoginRequiredMixin, DetailView):
+class SiteDetailView(LoginRequiredMixin, TemplateView):
     http_method_names = ['get']
-    model = ASite
-    pk_url_kwarg = 'site_id'
-    context_object_name = 'site'
     template_name = 'core/concrete_site.html'
 
+    def get_object(self, **kwargs):
+        uuid = kwargs.get('site_id')
+        try:
+            return TargetAccessor.send_request('/site/{}/'.format(uuid), {}, method='get')
+        except (ConnectionError, ReadTimeout):
+            add_message(self.request, ERROR, u'Сервис target в данный момент недоступен')
+
     def get(self, request, *args, **kwargs):
-        instance = self.get_object()
-        if request.user != instance.owner:
+        object = self.get_object(**kwargs)
+        if not object:
+            return HttpResponseNotFound()
+        if self.user_id != object.get('owner'):
             return HttpResponseForbidden()
-        return super().get(request, *args, **kwargs)
+        return super().get(request, *args, object=object, **kwargs)
+
+    def get_context_data(self, object, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['site'] = object
+        return context
 
 
-class AddCompanyView(AjaxFormView):
-    class AddCompanyForm(forms.ModelForm):
-        class Meta:
-            model = ACompany
-            fields = ('title', 'text', 'link', 'max_score')
-
-        def __init__(self, user, *args, **kwargs):
-            super().__init__(*args, **kwargs)
-            self.user = user
-
-        def save(self, commit=True):
-            instance = super().save(commit=False)
-            instance.owner = self.user
-            if commit:
-                instance.save()
-            return instance
-
+class AddCompanyView(LoginRequiredMixin, AjaxFormView):
     http_method_names = ['post']
+
+    class AddCompanyForm(forms.Form):
+        title = forms.CharField(max_length=100)
+        text = forms.CharField(max_length=300)
+        link = forms.URLField(max_length=256)
+        max_score = forms.IntegerField(min_value=0)
+
     form_class = AddCompanyForm
 
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['user'] = self.request.user
-        return kwargs
-
     def form_valid(self, form):
-        instance = form.save()
-        return JsonResponse({
-            'status': self.ok_status,
-            'data': instance.as_json()
-        })
+        form.cleaned_data['owner'] = self.user_id
+        try:
+            result = TargetAccessor.send_request('/company/create/', form.cleaned_data)
+            if result.get('status') != 'OK':
+                return JsonResponse({'status': self.error_status, 'errors': result.get('errors')})
+
+            company_data = result.get('data')
+            company_data['details_url'] = reverse('core:company_details', args=[company_data.get('id')])
+            return JsonResponse({'status': self.ok_status, 'data': company_data})
+
+        except (ConnectionError, ReadTimeout):
+            return JsonResponse({
+                'status': 'ERROR',
+                'errors': {'title': 'Сервис target в данный момент не доступен'},
+            })
 
 
-class CompanyDetailView(LoginRequiredMixin, DetailView):
+class CompanyDetailView(LoginRequiredMixin, TemplateView):
     http_method_names = ['get']
-    model = ACompany
-    pk_url_kwarg = 'company_id'
-    context_object_name = 'company'
     template_name = 'core/concrete_company.html'
 
+    def get_object(self, **kwargs):
+        uuid = kwargs.get('company_id')
+        try:
+            return TargetAccessor.send_request('/company/{}/'.format(uuid), {}, method='get')
+        except (ConnectionError, ReadTimeout):
+            add_message(self.request, ERROR, u'Сервис target в данный момент недоступен')
+
     def get(self, request, *args, **kwargs):
-        instance = self.get_object()
-        if request.user != instance.owner:
+        object = self.get_object(**kwargs)
+        if not object:
+            return HttpResponseNotFound()
+        if self.user_id != object.get('owner'):
             return HttpResponseForbidden()
-        return super().get(request, *args, **kwargs)
+        return super().get(request, *args, object=object, **kwargs)
+
+    def get_context_data(self, object, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['company'] = object
+        return context

@@ -13,7 +13,7 @@ urlpatterns = [
     url('^register/$', RegisterView.as_view(), name='register'),
 
     url('^site/add/$', AddSiteView.as_view(), name='add_site'),
-    url('^site/details/(?P<site_id>\d+)/$', SiteDetailView.as_view(), name='site_details'),
+    url('^site/details/(?P<site_id>[\d\w\-]+)/$', SiteDetailView.as_view(), name='site_details'),
     url('^company/add/$', AddCompanyView.as_view(), name='add_company'),
-    url('^company/details/(?P<company_id>\d+)/$', CompanyDetailView.as_view(), name='company_details'),
+    url('^company/details/(?P<company_id>[\d\w\-]+)/$', CompanyDetailView.as_view(), name='company_details'),
 ]

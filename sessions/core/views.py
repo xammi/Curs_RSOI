@@ -41,17 +41,20 @@ class AuthenticateView(CheckGrantMixin, View):
 class CreateUserView(CheckGrantMixin, View):
     http_method_names = ['post']
 
-    class RegisterForm(forms.ModelForm):
+    class CreateForm(forms.ModelForm):
         class Meta:
             model = User
             fields = ('email', 'first_name', 'last_name', 'role')
         password = forms.CharField(max_length=128)
 
     def post(self, request, *args, **kwargs):
-        form = CreateUserView.RegisterForm(request.POST)
+        form = CreateUserView.CreateForm(request.POST)
         if form.is_valid():
             user = User.objects.create_user(**form.cleaned_data, is_active=True)
-            return JsonResponse({'status': 'OK', 'data': user.as_dict()})
+            return JsonResponse({
+                'status': 'OK',
+                'data': {'id': user.id, 'email': user.email}
+            })
         return JsonResponse({'status': 'ERROR', 'errors': form.errors})
 
 

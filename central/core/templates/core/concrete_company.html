@@ -1,9 +1,9 @@
 {% extends 'core/base.html' %}
-{% load static %}
+{% load static core_tags %}
 
 {% block content %}
     <div class="content-inner" style="margin: 0 5%">
-        <h3>Детали по компании: {{ company.title }}</h3><br>
+        <h3>Детали по компании: {{ company|key:'title' }}</h3><br>
         <a href="{% url 'core:profile' %}">Назад к профилю</a>
     </div>
 {% endblock %}

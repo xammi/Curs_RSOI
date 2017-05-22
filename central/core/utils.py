@@ -11,7 +11,7 @@ from django.utils.dateparse import parse_date
 
 class Accessor:
     client_id = None
-    client_secret= None
+    client_secret = None
     service_url = None
 
     @classmethod
@@ -53,7 +53,7 @@ class Accessor:
     def send_request(cls, route, data, method='post'):
         token = cls.get_token()
 
-        auth_url = urljoin(settings.SESSIONS_URL, '/user' + route)
+        auth_url = urljoin(cls.service_url, route)
         auth_headers = {'Authorization': 'Bearer:{0}'.format(token)}
 
         if method == 'get':

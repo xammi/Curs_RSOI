@@ -1,5 +1,5 @@
 {% extends 'core/base.html' %}
-{% load static %}
+{% load static core_tags %}
 
 {% block css %}
     <link rel="stylesheet" href="{% static 'libs/css/magnific-popup.css' %}">
@@ -36,9 +36,9 @@
                     {% for company in my_companies %}
                         <div class="well well-success">
                             <div class="row">
-                                <h4 class="col-sm-5"><a href="{% url 'core:company_details' company.id %}">{{ company.title }}</a></h4>
+                                <h4 class="col-sm-5"><a href="{% url 'core:company_details' company|key:'id' %}">{{ company|key:'title' }}</a></h4>
                                 <div class="col-sm-2" style="line-height: 3em"><p></p></div>
-                                <div class="col-sm-2" style="line-height: 3em"><a href="{{ company.link }}">Переход по ссылке</a></div>
+                                <div class="col-sm-2" style="line-height: 3em"><a href="{{ company|key:'link' }}">Переход по ссылке</a></div>
                                 <div class="col-sm-3" style="line-height: 3em"><div style="color: green">Принято</div></div>
                             </div>
                         </div>
@@ -54,9 +54,9 @@
                     {% for site in my_sites %}
                         <div class="well well-success">
                             <div class="row">
-                                <h4 class="col-sm-5"><a href="{% url 'core:site_details' site.id %}">{{ site.title }}</a></h4>
-                                <div class="col-sm-2" style="line-height: 3em"><p>{{ site.get_human_topic }}</p></div>
-                                <div class="col-sm-2" style="line-height: 3em"><a href="{{ site.link }}">Переход на сайт</a></div>
+                                <h4 class="col-sm-5"><a href="{% url 'core:site_details' site|key:'id' %}">{{ site|key:'title' }}</a></h4>
+                                <div class="col-sm-2" style="line-height: 3em"><p>{{ site|key:'topic' }}</p></div>
+                                <div class="col-sm-2" style="line-height: 3em"><a href="{{ site|key:'link' }}">Переход на сайт</a></div>
                                 <div class="col-sm-3" style="line-height: 3em"><div style="color: red">Ожидает внедрения</div></div>
                             </div>
                         </div>

@@ -1,5 +1,6 @@
+import uuid
+
 from django.db import models
-from django.urls import reverse
 
 
 class DefaultModel(models.Model):
@@ -17,9 +18,10 @@ class ACompany(DefaultModel):
         verbose_name_plural = 'рекламные кампании'
         ordering = ['-created']
 
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(verbose_name='Название продукта', max_length=100)
     text = models.TextField(verbose_name='Текст', max_length=300)
-    owner = models.CharField(verbose_name='Владелец', max_length=32)
+    owner = models.CharField(verbose_name='Владелец', max_length=64)
     link = models.URLField(max_length=256, verbose_name='Ссылка перехода', blank=True, null=True)
     max_score = models.PositiveIntegerField(verbose_name='Макс. траты в неделю', blank=True, null=True)
 
@@ -33,8 +35,7 @@ class ACompany(DefaultModel):
             'text': self.text,
             'link': self.link,
             'max_score': self.max_score,
-            'owner_id': self.owner,
-            'details_url': reverse('core:company_details', args=[self.id]),
+            'owner': self.owner,
         }
 
 
@@ -44,6 +45,7 @@ class ImageAttachment(DefaultModel):
         verbose_name_plural = 'картинки'
         ordering = ['-weight']
 
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     company = models.ForeignKey('ACompany', verbose_name='Рекламная компания')
     image = models.ImageField(verbose_name='Файл картинки', upload_to='images')
     weight = models.IntegerField(verbose_name='Вес картинки', default=1)
@@ -76,10 +78,11 @@ class ASite(DefaultModel):
         verbose_name_plural = 'рекламные площадки'
         ordering = ['-created']
 
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(verbose_name='Название сайта', max_length=100)
     topic = models.PositiveIntegerField(verbose_name='Тип площадки', choices=TOPICS)
     link = models.URLField(max_length=256, verbose_name='Домен сайта')
-    owner = models.CharField(verbose_name='Владелец', max_length=32)
+    owner = models.CharField(verbose_name='Владелец', max_length=64)
 
     def __str__(self):
         return self.title
@@ -95,6 +98,5 @@ class ASite(DefaultModel):
             'title': self.title,
             'topic': self.get_human_topic(),
             'link': self.link,
-            'owner_id': self.owner,
-            'details_url': reverse('core:site_details', args=[self.id]),
+            'owner': self.owner,
         }

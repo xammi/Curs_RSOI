@@ -1,9 +1,9 @@
 {% extends 'core/base.html' %}
-{% load static %}
+{% load static core_tags %}
 
 {% block content %}
     <div class="content-inner" style="margin: 0 5%">
-        <h3>Детали по сайту: {{ site.title }}</h3><br>
+        <h3>Детали по сайту: {{ site|key:'title' }}</h3><br>
         <div class="panel panel-default">
             <div class="panel-heading">Ваш код для внедрения на сайте</div>
             <div class="panel-body">
