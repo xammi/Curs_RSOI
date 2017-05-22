@@ -241,31 +241,6 @@ class AddSiteView(LoginRequiredMixin, AjaxFormView):
             })
 
 
-class SiteDetailView(LoginRequiredMixin, TemplateView):
-    http_method_names = ['get']
-    template_name = 'core/concrete_site.html'
-
-    def get_object(self, **kwargs):
-        uuid = kwargs.get('site_id')
-        try:
-            return TargetAccessor.send_request('/site/{}/'.format(uuid), {}, method='get')
-        except (ConnectionError, ReadTimeout):
-            add_message(self.request, ERROR, u'Сервис target в данный момент недоступен')
-
-    def get(self, request, *args, **kwargs):
-        object = self.get_object(**kwargs)
-        if not object:
-            return HttpResponseNotFound()
-        if self.user_id != object.get('owner'):
-            return HttpResponseForbidden()
-        return super().get(request, *args, object=object, **kwargs)
-
-    def get_context_data(self, object, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['site'] = object
-        return context
-
-
 class AddCompanyView(LoginRequiredMixin, AjaxFormView):
     http_method_names = ['post']
 
@@ -295,14 +270,16 @@ class AddCompanyView(LoginRequiredMixin, AjaxFormView):
             })
 
 
-class CompanyDetailView(LoginRequiredMixin, TemplateView):
+class ProxyDetailView(LoginRequiredMixin, TemplateView):
     http_method_names = ['get']
-    template_name = 'core/concrete_company.html'
+    context_object_name = None
+    pk_url_name = None
+    target_route = None
 
     def get_object(self, **kwargs):
-        uuid = kwargs.get('company_id')
+        uuid = kwargs.get(self.pk_url_name)
         try:
-            return TargetAccessor.send_request('/company/{}/'.format(uuid), {}, method='get')
+            return TargetAccessor.send_request(self.target_route.format(uuid), {}, method='get')
         except (ConnectionError, ReadTimeout):
             add_message(self.request, ERROR, u'Сервис target в данный момент недоступен')
 
@@ -316,5 +293,20 @@ class CompanyDetailView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, object, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['company'] = object
+        context[self.context_object_name] = object
         return context
+
+
+class SiteDetailView(ProxyDetailView):
+    template_name = 'core/concrete_site.html'
+    context_object_name = 'site'
+    pk_url_name = 'site_id'
+    target_route = '/site/{}/'
+
+
+class CompanyDetailView(ProxyDetailView):
+    template_name = 'core/concrete_company.html'
+    context_object_name = 'company'
+    pk_url_name = 'company_id'
+    target_route = '/company/{}/'
+
