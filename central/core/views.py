@@ -7,7 +7,6 @@ from django.urls import reverse
 from django.views.generic import TemplateView, DetailView, FormView, RedirectView
 from requests import ReadTimeout, ConnectionError
 
-from core.models import User, ACompany, ASite
 from core.utils import SessionsAccessor, TargetAccessor
 
 
@@ -159,7 +158,7 @@ class ProfileView(LoginRequiredMixin, DetailView):
                 except (ConnectionError, ReadTimeout):
                     add_message(self.request, ERROR, u'Сервис target в данный момент недоступен')
 
-        context['SITE_TOPICS'] = ASite.TOPICS
+        context['SITE_TOPICS'] = TOPICS
         context['ADVISER'] = ADVISER
         context['SITE_OWNER'] = SITE_OWNER
         return context

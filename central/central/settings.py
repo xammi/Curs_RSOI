@@ -59,7 +59,6 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'central.urls'
 
-AUTH_USER_MODEL = 'core.User'
 
 LOGIN_URL = '/index/'
 
