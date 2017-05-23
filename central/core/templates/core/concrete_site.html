@@ -1,13 +1,61 @@
 {% extends 'core/base.html' %}
 {% load static core_tags %}
 
+{% block css %}
+    <link rel="stylesheet" href="{% static 'libs/css/bootstrap-tagsinput.css' %}">
+    <style>.bootstrap-tagsinput { width: 100%; }</style>
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'libs/js/bootstrap-tagsinput.min.js' %}"></script>
+    <script src="{% static 'libs/js/plugins/typeahead.min.js' %}"></script>
+    <script>
+        why_preset = [ {% for word in site|key:'why' %}'{{ word }}',{% endfor %} ];
+        who_preset = [ {% for word in site|key:'who' %}'{{ word }}',{% endfor %} ];
+        what_preset = [ {% for word in site|key:'what' %}'{{ word }}',{% endfor %} ];
+    </script>
+    <script src="{% static 'core/js/keywords.js' %}"></script>
+{% endblock %}
+
 {% block content %}
     <div class="content-inner" style="margin: 0 5%">
         <h3>Детали по сайту: {{ site|key:'title' }}</h3><br>
-        <div class="panel panel-default">
-            <div class="panel-heading">Ваш код для внедрения на сайте</div>
-            <div class="panel-body">
-                <textarea name="code" id="id_code" cols="50" rows="10"><script>{% include 'core/blocks/adv_code.js' %}</script></textarea>
+        <div class="row">
+            <div class="col-sm-5">
+                <div class="panel panel-default">
+                    <div class="panel-heading">Ваш код для внедрения на сайте</div>
+                    <div class="panel-body">
+                        <textarea name="code" id="id_code" cols="58" rows="14"><script>{% include 'core/blocks/adv_code.js' %}</script></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-1"></div>
+            <div class="col-sm-5">
+                <div class="panel panel-default">
+                    <div class="panel-heading">Выберите ключевые слова для описания сайта</div>
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <label for="id_why" class="control-label">Для чего ваш сайт?</label>
+                            <br>
+                            <input type="text" name="why-words" id="id_why">
+                        </div>
+                        <div class="form-group">
+                            <label for="id_who" class="control-label">Кто им пользуется?</label>
+                            <br>
+                            <input type="text" name="who-words" id="id_who">
+                        </div>
+                        <div class="form-group">
+                            <label for="id_what" class="control-label">Что на нём делают?</label>
+                            <br>
+                            <input type="text" name="what-words" id="id_what">
+                        </div>
+                    </div>
+                </div>
+                <div class="btn-wrapper" data-url="{% url 'core:save_keywords' site|key:'id' %}">
+                    {% csrf_token %}
+                    <button class="btn btn-default col-sm-offset-5 js-save">Сохранить</button>
+                    <span class="alert alert-danger col-sm-offset-4" hidden></span>
+                </div>
             </div>
         </div>
         <a href="{% url 'core:profile' %}">Назад к профилю</a>

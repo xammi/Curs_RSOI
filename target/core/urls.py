@@ -3,7 +3,7 @@ from django.conf.urls.static import static
 from django.conf import settings
 
 from core.views import CreateSiteView, CreateCompanyView, SiteListView, CompanyListView, SiteDetailView, \
-    CompanyDetailView, CreateImageView, DeleteImageView
+    CompanyDetailView, CreateImageView, DeleteImageView, SaveKeywords
 
 urlpatterns = [
     url(r'^site/create/$', CreateSiteView.as_view()),
@@ -16,5 +16,6 @@ urlpatterns = [
 
     url(r'^image/create/$', CreateImageView.as_view()),
     url(r'^image/delete/$', DeleteImageView.as_view()),
+    url(r'^keywords/save/$', SaveKeywords.as_view()),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

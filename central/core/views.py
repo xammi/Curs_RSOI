@@ -353,3 +353,21 @@ class DropImageView(LoginRequiredMixin, View):
 
         except (ConnectionError, ReadTimeout):
             return JsonResponse({'error': 'Сервис target в данный момент не доступен'})
+
+
+class SaveKeywordsView(LoginRequiredMixin, View):
+    http_method_names = ['post']
+
+    def post(self, request, *args, **kwargs):
+        uuid = kwargs.get('site_id')
+
+        data = {'site': uuid, 'owner': self.user_id}
+        for part in ['why', 'who', 'what']:
+            data[part] = request.POST.get(part)
+
+        try:
+            TargetAccessor.send_request('/keywords/save/', data)
+            return JsonResponse({'status': 'OK'})
+
+        except (ConnectionError, ReadTimeout):
+            return JsonResponse({'error': 'Сервис target в данный момент не доступен'})

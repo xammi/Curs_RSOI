@@ -132,3 +132,27 @@ class DeleteImageView(CheckGrantMixin, View):
 
         ImageAttachment.objects.filter(id=image_id).delete()
         return JsonResponse({'status': 'OK'})
+
+
+class SaveKeywords(CheckGrantMixin, View):
+    http_method_names = ['post']
+
+    def post(self, request, *args, **kwargs):
+        site_id = request.POST.get('site')
+        if not site_id:
+            return HttpResponseBadRequest()
+
+        site = ASite.objects.filter(id=site_id).first()
+        if not site:
+            return HttpResponseNotFound()
+
+        was_changed = False
+        for type in ['why', 'who', 'what']:
+            words = request.POST.get(type)
+            if words:
+                setattr(site, type + '_words', words)
+                was_changed = True
+
+        if was_changed:
+            site.save()
+        return JsonResponse({'status': 'OK'})

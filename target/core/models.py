@@ -90,6 +90,10 @@ class ASite(DefaultModel):
     link = models.URLField(max_length=256, verbose_name='Домен сайта')
     owner = models.CharField(verbose_name='Владелец', max_length=64)
 
+    why_words = models.CharField(max_length=256, verbose_name='Для чего?', null=True, blank=True)
+    who_words = models.CharField(max_length=256, verbose_name='Для кого?', null=True, blank=True)
+    what_words = models.CharField(max_length=256, verbose_name='Что тут делают?', null=True, blank=True)
+
     def __str__(self):
         return self.title
 
@@ -105,4 +109,7 @@ class ASite(DefaultModel):
             'topic': self.get_human_topic(),
             'link': self.link,
             'owner': self.owner,
+            'why': self.why_words.split(',') if self.why_words else [],
+            'who': self.who_words.split(',') if self.who_words else [],
+            'what': self.what_words.split(',') if self.what_words else [],
         }
