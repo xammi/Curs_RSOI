@@ -1,0 +1,44 @@
+{% extends 'core/base.html' %}
+{% load static core_tags %}
+
+{% block content %}
+    <div class="content-inner" style="margin: 0 5%">
+        <h3>Примеры внедрения )</h3><br>
+        <div class="row">
+            <div class="btn-group" role="group" aria-label="...">
+                {% if current > 1 %}
+                    <a type="button" class="btn btn-default" href="{% url 'core:demo' %}?current={{ prev }}">&lt;-&nbsp;&nbsp;Предыдущий</a>
+                {% endif %}
+
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        {{ current_site|key:'link' }}
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu js-site-selector">
+                        {% for site in sites %}
+                            <li class="{% if current_site == site %}active{% endif %}">
+                                <a href="{% url 'core:demo' %}?current={{ site|key:'current' }}">{{ site|key:'link' }}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% if current < sites_cnt %}
+                    <a type="button" class="btn btn-default" href="{% url 'core:demo' %}?current={{ next }}">Следующий&nbsp;&nbsp;-&gt;</a>
+                {% endif %}
+            </div>
+        </div>
+        <br><br>
+        <div class="row">
+            <iframe src="{{ current_site|key:'link' }}" frameborder="0" class="col-sm-8" height="700"></iframe>
+            <div class="targeto col-sm-3"></div>
+            <script>
+                $(function () {
+                    var path = 'http://127.0.0.1:8000/adv?site={{ site.id }}';
+                    var imgTag = '<img src="' + path + '" alt="Targeto block"/>';
+                    $('.targeto').html(imgTag);
+                });
+            </script>
+        </div>
+    </div>
+{% endblock %}

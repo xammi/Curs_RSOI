@@ -84,3 +84,10 @@ class TargetAccessor(Accessor):
     client_secret = settings.TARGET_SECRET
     service_url = settings.TARGET_URL
     prev_token = {'access_token': '', 'expires_in': None}
+
+
+class StatisticAccessor(Accessor):
+    client_id = settings.STATISTIC_ID
+    client_secret = settings.STATISTIC_SECRET
+    service_url = settings.STATISTIC_URL
+    prev_token = {'access_token': '', 'expires_in': None}

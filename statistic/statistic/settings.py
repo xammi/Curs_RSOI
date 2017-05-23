@@ -23,9 +23,24 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '^le&_l*z7nyy%eroj-^dtlcb4pv=l8_hwgw_mls=)hq&jf^u#u'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['95.163.32.114']
+
+SITE_URL = 'http://95.163.32.114:8003'
+
+EXTERNAL_ACCESS = {
+    'fNdWPYKhXnnuxFiFVByOzOyqlTZrDynqKZtAHmmA': {
+        'name': 'central',
+        'client_id': 'fNdWPYKhXnnuxFiFVByOzOyqlTZrDynqKZtAHmmA',
+        'client_secret': 'zhZuvixkqtcQigPIRSTcSjesNfrodWDognFKLRXfZprlNHnGkVYlcfsOyzJMdxXsSSQtJPELBKgtThRIUfGhGEGfEGPGRWcgnRBIXtNGiNEYiepfTPiJFnxZlPPWALVa',
+    },
+    'JiZVrthIgyXeJjcigfujNAdRrgqizPDkJgAmyLvy': {
+        'name': 'target',
+        'client_id': 'JiZVrthIgyXeJjcigfujNAdRrgqizPDkJgAmyLvy',
+        'client_secret': 'ZqUcuwOCBSmlsQmLmgbOHozXrfyrVVoVBQHexrNXOuyyqdhrvgmNCuwfvgxjvkFJmetABFzDpnrctTKLmtQMVGssOCjBSFFYPehQaAZKdRcwdIfNeVJvkwGYUjebLUDy',
+    },
+}
 
 
 # Application definition
@@ -37,16 +52,17 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+] + [
+    'core',
+    'grant',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
 ROOT_URLCONF = 'statistic.urls'
@@ -84,9 +100,9 @@ DATABASES = {
 # Internationalization
 # https://docs.djangoproject.com/en/1.10/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru-ru'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
 
@@ -99,3 +115,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
 STATIC_URL = '/static/'
+
+try:
+    from .local_settings import *
+except ImportError:
+    pass

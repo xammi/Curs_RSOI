@@ -31,7 +31,9 @@ SITE_URL = 'http://95.163.32.114:8000'
 
 SESSIONS_URL = 'http://95.163.32.114:8001'
 
-TARGET_URL = 'http://95.163.32.114:8001'
+TARGET_URL = 'http://95.163.32.114:8002'
+
+STATISTIC_URL = 'http://95.163.32.114:8003'
 
 
 # Application definition
@@ -123,6 +125,9 @@ SESSIONS_SECRET = 'It9aTzpJP9bzS1KLCEyPi8xBsB1WPxHpMxbArCec7tT7ifky5RodBHeiOzJ9l
 
 TARGET_ID = 'qkoerckHSfpCveBLpbpQpJehADDaQvQMYoVScvgn'
 TARGET_SECRET = 'cnLSKSgHJAuZqlMErnLeRNefkbBvCaIVQyIhIFXKfcVjnwxxsoAIXNVNqfJNNjcZcZLBpoVAKXQBhUnfZNVWCsiTyxnuGyNCRFQKKbpOlEvneuGwJLTSNrDtgbSFkgHS'
+
+STATISTIC_ID = 'fNdWPYKhXnnuxFiFVByOzOyqlTZrDynqKZtAHmmA'
+STATISTIC_SECRET = 'zhZuvixkqtcQigPIRSTcSjesNfrodWDognFKLRXfZprlNHnGkVYlcfsOyzJMdxXsSSQtJPELBKgtThRIUfGhGEGfEGPGRWcgnRBIXtNGiNEYiepfTPiJFnxZlPPWALVa'
 
 try:
     from .local_settings import *

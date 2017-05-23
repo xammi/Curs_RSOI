@@ -29,6 +29,8 @@ ALLOWED_HOSTS = ['95.163.32.114']
 
 SITE_URL = 'http://95.163.32.114:8002'
 
+STATISTIC_URL = 'http://95.163.32.114:8003'
+
 EXTERNAL_ACCESS = {
     'qkoerckHSfpCveBLpbpQpJehADDaQvQMYoVScvgn': {
         'name': 'central',
@@ -57,6 +59,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
@@ -114,6 +117,13 @@ STATIC_URL = '/static/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 MEDIA_URL = '/media/'
+
+
+# ACCESS
+
+STATISTIC_ID = 'JiZVrthIgyXeJjcigfujNAdRrgqizPDkJgAmyLvy'
+STATISTIC_SECRET = 'ZqUcuwOCBSmlsQmLmgbOHozXrfyrVVoVBQHexrNXOuyyqdhrvgmNCuwfvgxjvkFJmetABFzDpnrctTKLmtQMVGssOCjBSFFYPehQaAZKdRcwdIfNeVJvkwGYUjebLUDy'
+
 
 try:
     from .local_settings import *

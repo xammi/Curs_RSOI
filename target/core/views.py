@@ -3,6 +3,7 @@ from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseNotFou
 from django.views import View
 
 from core.models import ASite, ACompany, ImageAttachment
+from core.access import StatisticAccessor
 from grant.views import CheckGrantMixin
 
 

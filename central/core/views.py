@@ -8,7 +8,7 @@ from django.views import View
 from django.views.generic import TemplateView, DetailView, FormView, RedirectView
 from requests import ReadTimeout, ConnectionError
 
-from core.utils import SessionsAccessor, TargetAccessor
+from core.access import SessionsAccessor, TargetAccessor, StatisticAccessor
 
 
 ADVISER = 'Рекламодатель'
@@ -371,3 +371,40 @@ class SaveKeywordsView(LoginRequiredMixin, View):
 
         except (ConnectionError, ReadTimeout):
             return JsonResponse({'error': 'Сервис target в данный момент не доступен'})
+
+
+class DemoView(TemplateView):
+    http_method_names = ['get']
+    template_name = 'core/demo.html'
+
+    def get(self, request, *args, **kwargs):
+        current = request.GET.get('current', 1)
+        try:
+            current = int(current)
+        except (ValueError, TypeError):
+            current = 1
+        return super().get(request, *args, current=current, **kwargs)
+
+    def get_context_data(self, current, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['current'] = current
+        try:
+            result = TargetAccessor.send_request('/site/list/', {}, method='get')
+            context['sites'] = result.get('data')
+            for index, site in enumerate(context['sites']):
+                site['current'] = index + 1
+
+            context['sites_cnt'] = len(result.get('data'))
+            context['current_site'] = context['sites'][current - 1]
+            context['prev'] = current - 1
+            context['next'] = current + 1
+        except (ConnectionError, ReadTimeout):
+            add_message(self.request, ERROR, u'Сервис target в данный момент недоступен')
+        return context
+
+
+class AdvertiseView(View):
+    http_method_names = ['get']
+
+    def get(self, request, *args, **kwargs):
+        return JsonResponse({})
