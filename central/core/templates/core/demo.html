@@ -32,13 +32,22 @@
         <div class="row">
             <iframe src="{{ current_site|key:'link' }}" frameborder="0" class="col-sm-8" height="700"></iframe>
             <div class="targeto col-sm-3"></div>
-            <script>
-                $(function () {
-                    var path = 'http://127.0.0.1:8000/adv?site={{ site.id }}';
-                    var imgTag = '<img src="' + path + '" alt="Targeto block"/>';
-                    $('.targeto').html(imgTag);
-                });
-            </script>
         </div>
     </div>
+{% endblock %}
+
+{% block body_js %}
+<script>
+    $(function () {
+        var p = "{{ site_url }}{% url 'core:adv' %}?site={{ current_site|key:'id' }}";
+        $.get(p).done(function (r) {
+            var inEl = $('.targeto');
+            if (inEl.length === 0) {
+                inEl = $('<div class="targeto"></div>');
+                $('body').prepend(inEl);
+            }
+            inEl.html(r.html);
+        });
+    });
+</script>
 {% endblock %}

@@ -14,7 +14,7 @@ $(document).ready(function () {
     $('#js-more').click(function () {
         $.fn.fullpage.moveSectionDown();
     });
-    $('#js-login-form').submit(function (event) {
+    $('.js-login-form').submit(function (event) {
         event.preventDefault();
         $.post($(this).attr('action'), $(this).serialize())
             .done(function (response) {

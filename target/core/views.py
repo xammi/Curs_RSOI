@@ -1,5 +1,7 @@
 from django import forms
+from django.db.models import Count
 from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseNotFound
+from django.utils import timezone
 from django.views import View
 
 from core.models import ASite, ACompany, ImageAttachment
@@ -157,3 +159,23 @@ class SaveKeywords(CheckGrantMixin, View):
         if was_changed:
             site.save()
         return JsonResponse({'status': 'OK'})
+
+
+class AdvertiseView(View):
+    http_method_names = ['get']
+
+    def choose_adv(self, site, request, now):
+        return ACompany.objects.annotate(image_cnt=Count('imageattachment')).order_by('-image_cnt').first()
+
+    def get(self, request, *args, **kwargs):
+        now = timezone.now()
+        site_id = request.GET.get('site')
+        if not site_id:
+            return HttpResponseBadRequest()
+
+        site = ASite.objects.filter(id=site_id).first()
+        if not site:
+            return HttpResponseNotFound()
+
+        company = self.choose_adv(site, request.META, now)
+        return JsonResponse(company.as_adv_data())

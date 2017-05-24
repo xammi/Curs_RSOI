@@ -1,4 +1,4 @@
-<form id="js-login-form" action="{% url 'core:login' %}" method="post" class="form-horizontal" style="margin:30px;min-width:260px">
+<form action="{% url 'core:login' %}" method="post" class="form-horizontal js-login-form" style="margin:30px;min-width:260px">
     {% csrf_token %}
     <h3>Log in</h3>
     <div class="form-group">

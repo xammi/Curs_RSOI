@@ -22,5 +22,5 @@ urlpatterns = [
     url('^image/drop/(?P<image_id>[\d\w\-]+)/$', DropImageView.as_view(), name='drop_image'),
     url('^keywords/save/(?P<site_id>[\d\w\-]+)/$', SaveKeywordsView.as_view(), name='save_keywords'),
 
-    url('^adv/', AdvertiseView.as_view(), name='adv'),
+    url('^adv/$', AdvertiseView.as_view(), name='adv'),
 ]

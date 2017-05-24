@@ -1,5 +1,13 @@
+{% load core_tags %}
+
 $(function () {
-    var path = "{% url 'core:adv' %}?site={{ site.id }}";
-    var imgTag = '<img src="' + path + '" alt="Targeto block"/>';
-    $('.targeto').html(imgTag);
+    var p = "{{ site_url }}{% url 'core:adv' %}?site={{ site|key:'id' }}";
+    $.get(p).done(function (r) {
+        var inEl = $('.targeto');
+        if (inEl.length === 0) {
+            inEl = $('<div class="targeto"></div>');
+            $('body').prepend(inEl);
+        }
+        inEl.html(r.html);
+    });
 });

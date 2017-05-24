@@ -3,6 +3,7 @@ from django.contrib.messages import add_message, ERROR
 from django.core.exceptions import ValidationError
 from django.http import HttpResponseForbidden, HttpResponseNotFound, HttpResponse, HttpResponseBadRequest
 from django.http import JsonResponse, HttpResponseRedirect
+from django.template import Context, loader
 from django.urls import reverse
 from django.views import View
 from django.views.generic import TemplateView, DetailView, FormView, RedirectView
@@ -403,8 +404,29 @@ class DemoView(TemplateView):
         return context
 
 
-class AdvertiseView(View):
+class AdvertiseView(TemplateView):
     http_method_names = ['get']
+    template_name = 'core/blocks/adv_block.html'
 
     def get(self, request, *args, **kwargs):
-        return JsonResponse({})
+        site = request.GET.get('site')
+        if not site:
+            return HttpResponseBadRequest()
+        return super().get(request, *args, site=site, **kwargs)
+
+    def render_to_response(self, context, **response_kwargs):
+        context = Context(context)
+        rendered = loader.render_to_string(self.template_name, context=context)
+        return JsonResponse({
+            'html': rendered,
+        })
+
+    def get_context_data(self, site, **kwargs):
+        context = super().get_context_data(**kwargs)
+        try:
+            adv = TargetAccessor.send_request('/adv/', {'site': site}, method='get')
+            if adv:
+                context.update(adv)
+        except (ConnectionError, ReadTimeout):
+            context['error'] = 'Сервис target в данный момент недоступен'
+        return context

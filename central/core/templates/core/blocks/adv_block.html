@@ -1,0 +1,11 @@
+<div class="targeto-adv">
+    {% if not error %}
+        <a href="{{ link }}" class="targeto-link">
+            <img src="{% if image_url %}{{ image_url }}{% endif %}" alt="Targeto adv" class="targeto-image">
+            <h3 class="targeto-title">{{ title }}</h3>
+            {% if text %}
+                <p class="targeto-text">{{ text }}</p>
+            {% endif %}
+        </a>
+    {% endif %}
+</div>

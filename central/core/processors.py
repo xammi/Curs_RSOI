@@ -3,7 +3,8 @@ from django.conf import settings
 
 def service_domains(request):
     return {
-        'target_domain': settings.TARGET_URL
+        'target_domain': settings.TARGET_URL,
+        'site_url': settings.SITE_URL,
     }
 
 

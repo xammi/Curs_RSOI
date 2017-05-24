@@ -1,3 +1,4 @@
+import random
 import uuid
 
 from django.db import models
@@ -36,6 +37,28 @@ class ACompany(DefaultModel):
             'link': self.link,
             'max_score': self.max_score,
             'owner': self.owner,
+        }
+
+    def get_random_image(self):
+        objects = self.imageattachment_set.all()
+        weights = map(lambda x: x.weight, objects)
+
+        num = random.randint(1, sum(weights) * 10)
+        marker = 0
+        for index, weight in enumerate(weights):
+            if weight > 0:
+                old, marker = marker, marker + weight * 10
+                if old < num <= marker:
+                    return objects[index][0]
+        return None
+
+    def as_adv_data(self):
+        image = self.get_random_image()
+        return {
+            'title': self.title,
+            'link': self.link,
+            'text': self.text,
+            'image_url': image.url if image else None,
         }
 
 
