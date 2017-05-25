@@ -1,7 +1,8 @@
 from django.conf.urls import url
 
 from core.views import IndexView, ProfileView, LoginView, LogoutView, RegisterView, AddSiteView, SiteDetailView, \
-    AddCompanyView, CompanyDetailView, AddImageView, DropImageView, SaveKeywordsView, DemoView, AdvertiseView
+    AddCompanyView, CompanyDetailView, AddImageView, DropImageView, SaveKeywordsView, DemoView, AdvertiseView, \
+    ClickView
 
 urlpatterns = [
     url('^$', IndexView.as_view(), name='home'),
@@ -23,4 +24,5 @@ urlpatterns = [
     url('^keywords/save/(?P<site_id>[\d\w\-]+)/$', SaveKeywordsView.as_view(), name='save_keywords'),
 
     url('^adv/$', AdvertiseView.as_view(), name='adv'),
+    url('^click/$', ClickView.as_view(), name='click'),
 ]

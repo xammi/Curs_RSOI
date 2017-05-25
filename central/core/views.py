@@ -3,7 +3,7 @@ from django.contrib.messages import add_message, ERROR
 from django.core.exceptions import ValidationError
 from django.http import HttpResponseForbidden, HttpResponseNotFound, HttpResponse, HttpResponseBadRequest
 from django.http import JsonResponse, HttpResponseRedirect
-from django.template import Context, loader
+from django.template import loader, Context
 from django.urls import reverse
 from django.utils import timezone
 from django.views import View
@@ -417,7 +417,7 @@ class AdvertiseView(TemplateView):
 
     def render_to_response(self, context, **response_kwargs):
         context = Context(context)
-        rendered = loader.render_to_string(self.template_name, context=context)
+        rendered = loader.render_to_string(self.template_name, context=context, request=self.request)
         return JsonResponse({
             'html': rendered,
         })
@@ -442,15 +442,31 @@ class AdvertiseView(TemplateView):
     def send_stat(request, adv):
         try:
             stat_data = {
-                'now': timezone.now(),
+                'accepted': timezone.now().strftime('%d.%m.%Y %H:%M:%S'),
                 'site': smart_get(adv, 'site.id'),
                 'image': smart_get(adv, 'image.id'),
                 'company': adv.get('id'),
                 'user_agent': request.META.get('HTTP_USER_AGENT'),
             }
             result = StatisticAccessor.send_request('/display/create/', stat_data)
-            return result.get('id')
+            return result.get('id') if result.get('status') == 'OK' else None
 
         except (ConnectionError, ReadTimeout):
             print('Сервис statistic в данный момент не доступен')
             return None
+
+
+class ClickView(View):
+    http_method_names = ['post']
+
+    def post(self, request, *args, **kwargs):
+        try:
+            click_data = {
+                'display': request.POST.get('display'),
+                'accepted': timezone.now().strftime('%d.%m.%Y %H:%M:%S'),
+            }
+            StatisticAccessor.send_request('/transit/create/', click_data)
+        except (ConnectionError, ReadTimeout):
+            print('Сервис statistic в данный момент не доступен')
+
+        return JsonResponse({'status': 'OK'})

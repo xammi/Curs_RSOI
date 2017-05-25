@@ -2,6 +2,7 @@
 <div class="targeto-adv">
     {% if not error %}
         <a href="{{ link }}" class="targeto-link">
+            {% csrf_token %}
             <img src="{% if image_url %}{{ image_url }}{% endif %}" alt="Targeto adv" class="targeto-image">
             <h4 class="targeto-title">{{ title }}</h4>
             {% if text %}
@@ -10,3 +11,10 @@
         </a>
     {% endif %}
 </div>
+<script>
+function handler () {
+    var data = {display: '{{ display_id }}', csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val()};
+    $.post('{{ site_url }}{% url 'core:click' %}', data);
+}
+$('.targeto-link').on('mousedown', handler).on('touchstart', handler);
+</script>
