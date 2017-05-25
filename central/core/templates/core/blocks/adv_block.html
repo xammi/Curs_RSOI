@@ -1,8 +1,9 @@
+<style> .targeto-image { width: 200px; height: {{ image_factor }}px; } .targeto-link { width: 200px; display: inline-block } </style>
 <div class="targeto-adv">
     {% if not error %}
         <a href="{{ link }}" class="targeto-link">
             <img src="{% if image_url %}{{ image_url }}{% endif %}" alt="Targeto adv" class="targeto-image">
-            <h3 class="targeto-title">{{ title }}</h3>
+            <h4 class="targeto-title">{{ title }}</h4>
             {% if text %}
                 <p class="targeto-text">{{ text }}</p>
             {% endif %}

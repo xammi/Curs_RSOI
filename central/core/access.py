@@ -32,6 +32,10 @@ class Accessor:
         return urljoin(cls.service_url, '/app/token/')
 
     @classmethod
+    def get_absolute_for(cls, route):
+        return urljoin(cls.service_url, route)
+
+    @classmethod
     def get_token(cls):
         if cls.is_token_actual():
             return cls.prev_token.get('access_token')

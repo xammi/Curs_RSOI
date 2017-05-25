@@ -41,7 +41,7 @@ class ACompany(DefaultModel):
 
     def get_random_image(self):
         objects = self.imageattachment_set.all()
-        weights = map(lambda x: x.weight, objects)
+        weights = list(map(lambda x: x.weight, objects))
 
         num = random.randint(1, sum(weights) * 10)
         marker = 0
@@ -49,16 +49,17 @@ class ACompany(DefaultModel):
             if weight > 0:
                 old, marker = marker, marker + weight * 10
                 if old < num <= marker:
-                    return objects[index][0]
+                    return objects[index]
         return None
 
     def as_adv_data(self):
-        image = self.get_random_image()
+        attach = self.get_random_image()
         return {
+            'id': self.id,
             'title': self.title,
             'link': self.link,
             'text': self.text,
-            'image_url': image.url if image else None,
+            'image': attach.as_dict() if attach else {},
         }
 
 
@@ -80,7 +81,12 @@ class ImageAttachment(DefaultModel):
         return {
             'id': self.id,
             'url': self.image.url,
+            'factor': self.get_factor(),
         }
+
+    def get_factor(self):
+        width, height = self.image.width, self.image.height
+        return float(height) / float(width)
 
 
 class ASite(DefaultModel):

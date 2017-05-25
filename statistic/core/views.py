@@ -1,3 +1,23 @@
-from django.shortcuts import render
+from django.http import JsonResponse
+from django.views import View
 
-# Create your views here.
+
+class CreateDisplayView(View):
+    http_method_names = ['post']
+
+    def post(self, request, *args, **kwargs):
+        return JsonResponse({'status': 'OK'})
+
+
+class CreateTransitView(View):
+    http_method_names = ['post']
+
+    def post(self, request, *args, **kwargs):
+        return JsonResponse({'status': 'OK'})
+
+
+class StatView(View):
+    http_method_names = ['get']
+
+    def get(self, request, *args, **kwargs):
+        return JsonResponse({'status': 'OK'})

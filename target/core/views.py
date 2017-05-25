@@ -5,7 +5,6 @@ from django.utils import timezone
 from django.views import View
 
 from core.models import ASite, ACompany, ImageAttachment
-from core.access import StatisticAccessor
 from grant.views import CheckGrantMixin
 
 
@@ -165,7 +164,8 @@ class AdvertiseView(View):
     http_method_names = ['get']
 
     def choose_adv(self, site, request, now):
-        return ACompany.objects.annotate(image_cnt=Count('imageattachment')).order_by('-image_cnt').first()
+        companies = ACompany.objects.annotate(image_cnt=Count('imageattachment')).order_by('-image_cnt')
+        return companies.first()
 
     def get(self, request, *args, **kwargs):
         now = timezone.now()
@@ -178,4 +178,9 @@ class AdvertiseView(View):
             return HttpResponseNotFound()
 
         company = self.choose_adv(site, request.META, now)
-        return JsonResponse(company.as_adv_data())
+        if not company:
+            return HttpResponseNotFound()
+
+        adv = company.as_adv_data()
+        adv['site'] = site.as_dict()
+        return JsonResponse(adv)

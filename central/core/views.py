@@ -5,12 +5,13 @@ from django.http import HttpResponseForbidden, HttpResponseNotFound, HttpRespons
 from django.http import JsonResponse, HttpResponseRedirect
 from django.template import Context, loader
 from django.urls import reverse
+from django.utils import timezone
 from django.views import View
 from django.views.generic import TemplateView, DetailView, FormView, RedirectView
 from requests import ReadTimeout, ConnectionError
 
 from core.access import SessionsAccessor, TargetAccessor, StatisticAccessor
-
+from core.utils import smart_get
 
 ADVISER = 'Рекламодатель'
 SITE_OWNER = 'Владелец сайта'
@@ -426,7 +427,30 @@ class AdvertiseView(TemplateView):
         try:
             adv = TargetAccessor.send_request('/adv/', {'site': site}, method='get')
             if adv:
+                image_url = smart_get(adv, 'image.url')
+                if image_url:
+                    adv['image_url'] = TargetAccessor.get_absolute_for(image_url)
+                    adv['image_factor'] = 200 * smart_get(adv, 'image.factor')
+
+                context['display_id'] = self.send_stat(self.request, adv)
                 context.update(adv)
         except (ConnectionError, ReadTimeout):
             context['error'] = 'Сервис target в данный момент недоступен'
         return context
+
+    @staticmethod
+    def send_stat(request, adv):
+        try:
+            stat_data = {
+                'now': timezone.now(),
+                'site': smart_get(adv, 'site.id'),
+                'image': smart_get(adv, 'image.id'),
+                'company': adv.get('id'),
+                'user_agent': request.META.get('HTTP_USER_AGENT'),
+            }
+            result = StatisticAccessor.send_request('/display/create/', stat_data)
+            return result.get('id')
+
+        except (ConnectionError, ReadTimeout):
+            print('Сервис statistic в данный момент не доступен')
+            return None
