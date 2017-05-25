@@ -28,18 +28,21 @@ else
 	echo "Deleting old images ..."
     OLD=$(docker ps -a | awk '{print $1}')
     if [ -z $OLD ]; then
+        true
     else
         docker stop $OLD
     fi
 
     EXITED=$(docker ps -a -f status=exited -q)
     if [ -z $EXITED ]; then
+        true
     else
         docker rm $EXITED
     fi
 
     CREATED=$(docker ps -a -f status=created -q)
     if [ -z $CREATED ]; then
+        true
     else
         docker rm $CREATED
     fi
