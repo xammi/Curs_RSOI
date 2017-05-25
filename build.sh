@@ -48,7 +48,7 @@ else
     fi
 
 	port=8000
-	for i in ${PROJECTS}; do
+	for i in ${PROJECTS[@]}; do
 		echo "Image starting: ${i} at port=${port} ..."
 		docker run -p ${port}:80 -td ${i}
 		port=$[port + 1]
