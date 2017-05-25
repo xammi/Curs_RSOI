@@ -11,7 +11,6 @@ function find_projects {
 
             if [ -e $filepath/Dockerfile ]; then
                 docker build -t $i $filepath
-                docker stop $(docker ps -a | grep "${i}" | awk '{print $1}')
                 PROJECTS+=($i)
             fi
         fi
@@ -27,7 +26,23 @@ else
 	echo "Projects found: ${PROJECTS[@]}"
 	
 	echo "Deleting old images ..."
-	docker rm $(docker ps -a -f status=exited -q)
+    OLD=$(docker ps -a | awk '{print $1}')
+    if [ -z $OLD ]; then
+    else
+        docker stop $OLD
+    fi
+
+    EXITED=$(docker ps -a -f status=exited -q)
+    if [ -z $EXITED ]; then
+    else
+        docker rm $EXITED
+    fi
+
+    CREATED=$(docker ps -a -f status=created -q)
+    if [ -z $CREATED ]; then
+    else
+        docker rm $CREATED
+    fi
 
 	port=8000
 	for i in ${PROJECTS}; do
