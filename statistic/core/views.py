@@ -43,23 +43,52 @@ class CreateTransitView(CheckGrantMixin, View):
 class StatView(CheckGrantMixin, View):
     http_method_names = ['get']
     filter_by = ('company', 'site')
-    extractor = lambda x: x.accepted.strftime('%d.%m.%Y %H:%M:%S')
+
+    @classmethod
+    def get_datetime_fmt(cls, group_by):
+        if group_by == 'minute':
+            return '%d.%m.%Y %H:%M'
+        elif group_by == 'hour':
+            return '%d.%m.%Y %H'
+        elif group_by == 'day':
+            return '%d.%m.%Y'
+        return '%d.%m.%Y %H:%M:%S'
 
     @staticmethod
-    def collect_kwargs(request, names):
+    def collect_kwargs(request, names, prefix=''):
         kwargs = {}
         for name in names:
             value = request.GET.get(name)
             if value:
-                kwargs[name] = value
+                kwargs[prefix + name] = value
         return kwargs
 
+    @classmethod
+    def collect_groups(cls, data, group_by):
+        groups = {}
+        fmt = cls.get_datetime_fmt(group_by)
+        for item in data:
+            date = item.accepted.strftime(fmt)
+            if date not in groups:
+                groups[date] = {'cnt': 0, 'items': []}
+            groups[date]['cnt'] += 1
+
+            item_stat = item.as_stat()
+            if item_stat:
+                groups[date]['items'].append(item_stat)
+        return groups
+
     def get(self, request, *args, **kwargs):
+        group_by = request.GET.get('group', 'minute')
+
         filter_kwargs = self.collect_kwargs(request, self.filter_by)
-        transits = Transit.objects.filter(**filter_kwargs)
         displays = Display.objects.filter(**filter_kwargs)
+
+        filter_kwargs = self.collect_kwargs(request, self.filter_by, prefix='display__')
+        transits = Transit.objects.filter(**filter_kwargs)
+
         stat = {
-            'transits': list(map(self.extractor, transits)),
-            'displays': list(map(self.extractor, displays)),
+            'transits': self.collect_groups(transits, group_by),
+            'displays': self.collect_groups(displays, group_by),
         }
         return JsonResponse({'status': 'OK', 'stat': stat})

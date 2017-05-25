@@ -20,6 +20,12 @@ class Display(models.Model):
     def __unicode__(self):
         return 'Показ ID={}'.format(self.id)
 
+    def parse_user_agent(self):
+        pass
+
+    def as_stat(self):
+        return {}
+
 
 class Transit(models.Model):
     class Meta:
@@ -32,3 +38,6 @@ class Transit(models.Model):
 
     def __unicode__(self):
         return 'Переход ID={}'.format(self.id)
+
+    def as_stat(self):
+        return {}

@@ -4,6 +4,7 @@
 {% block css %}
     <link rel="stylesheet" href="{% static 'libs/css/bootstrap-tagsinput.css' %}">
     <style>.bootstrap-tagsinput { width: 100%; }</style>
+    <link rel="stylesheet" href="{% static 'libs/css/highcharts.css' %}">
 {% endblock %}
 
 {% block js %}
@@ -15,6 +16,7 @@
         what_preset = [ {% for word in site|key:'what' %}'{{ word }}',{% endfor %} ];
     </script>
     <script src="{% static 'core/js/keywords.js' %}"></script>
+    <script src="{% static 'libs/js/highcharts.js' %}"></script>
 {% endblock %}
 
 {% block content %}
@@ -58,6 +60,32 @@
                 </div>
             </div>
         </div>
+        <br>
+        <div id="container" style="min-width: 310px; height: 300px"></div>
+        <br>
+        <hr>
         <a href="{% url 'core:profile' %}">Назад к профилю</a>
     </div>
+{% endblock %}
+
+{% block body_js %}
+    <script>
+        var displaysStat = $.parseJSON('{{ displays_stat|safe }}');
+        displaysStat = displaysStat.map(function (x) { return [new Date(x[0]).getTime(), x[1]]; });
+
+        var transitsStat = $.parseJSON('{{ transits_stat|safe }}');
+        transitsStat = transitsStat.map(function (x) { return [new Date(x[0]).getTime(), x[1]]; });
+
+        Highcharts.chart('container', {
+            chart: {zoomType: 'x'},
+            title: {text: 'Отчет по просмотрам и кликам'},
+            xAxis: {type: 'datetime'},
+            yAxis: {title: {text: 'Количество'}},
+            legend: {enabled: false},
+            series: [
+                {name: 'Displays', data: displaysStat},
+                {name: 'Transits', data: transitsStat}
+            ]
+        });
+    </script>
 {% endblock %}

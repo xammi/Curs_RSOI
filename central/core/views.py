@@ -1,3 +1,5 @@
+import json
+
 from django import forms
 from django.contrib.messages import add_message, ERROR
 from django.core.exceptions import ValidationError
@@ -11,7 +13,7 @@ from django.views.generic import TemplateView, DetailView, FormView, RedirectVie
 from requests import ReadTimeout, ConnectionError
 
 from core.access import SessionsAccessor, TargetAccessor, StatisticAccessor
-from core.utils import smart_get
+from core.utils import smart_get, convert_date
 
 ADVISER = 'Рекламодатель'
 SITE_OWNER = 'Владелец сайта'
@@ -286,6 +288,16 @@ class ProxyDetailView(LoginRequiredMixin, TemplateView):
         except (ConnectionError, ReadTimeout):
             add_message(self.request, ERROR, u'Сервис target в данный момент недоступен')
 
+    def get_stat(self, **kwargs):
+        uuid = kwargs.get(self.pk_url_name)
+        try:
+            data = {self.context_object_name: uuid}
+            result = StatisticAccessor.send_request('/stat/', data, method='get')
+            if result.get('status') == 'OK':
+                return result.get('stat')
+        except (ConnectionError, ReadTimeout):
+            add_message(self.request, ERROR, u'Сервис statistics в данный момент недоступен')
+
     def get(self, request, *args, **kwargs):
         object = self.get_object(**kwargs)
         if not object:
@@ -294,9 +306,23 @@ class ProxyDetailView(LoginRequiredMixin, TemplateView):
             return HttpResponseForbidden()
         return super().get(request, *args, object=object, **kwargs)
 
+    @classmethod
+    def prepare_stat_item(cls, item):
+        str_date, data = item[0], item[1]
+        str_date = convert_date(str_date, '%d.%m.%Y %H:%M', '%Y-%m-%dT%H:%M:%S')
+        return [str_date, data.get('cnt')]
+
     def get_context_data(self, object, **kwargs):
         context = super().get_context_data(**kwargs)
         context[self.context_object_name] = object
+        stat = self.get_stat(**kwargs)
+        if stat:
+            displays_stat = stat.get('displays').items()
+            transits_stat = stat.get('transits').items()
+            displays_stat = list(sorted(map(self.prepare_stat_item, displays_stat), key=lambda x: x[0]))
+            transits_stat = list(sorted(map(self.prepare_stat_item, transits_stat), key=lambda x: x[0]))
+            context['displays_stat'] = json.dumps(displays_stat)
+            context['transits_stat'] = json.dumps(transits_stat)
         return context
 
 
